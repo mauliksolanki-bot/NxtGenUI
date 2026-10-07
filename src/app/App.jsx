@@ -6,25 +6,25 @@ import LoginPage from './pages/login/LoginPage.jsx'
 import PlaceholderPage from './pages/placeholder/PlaceholderPage.jsx'
 
 export default function App() {
-  return (
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route
-        element={
-          <RequireSession>
-            <AppShell />
-          </RequireSession>
-        }
-      >
-        <Route path="/dashboard" element={<HomePage />} />
-        <Route path="/incidents" element={<PlaceholderPage title="Incidents" />} />
-        <Route path="/catalog" element={<PlaceholderPage title="Service Catalog" />} />
-        <Route path="/knowledge" element={<PlaceholderPage title="Knowledge" />} />
-        <Route path="/requests" element={<PlaceholderPage title="Requests" />} />
-        <Route path="/admin" element={<PlaceholderPage title="Admin" />} />
-      </Route>
-      <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route path="*" element={<Navigate to="/login" replace />} />
-    </Routes>
-  )
+    return (
+        <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route
+                element={
+                    <RequireSession>
+                        <AppShell />
+                    </RequireSession>
+                }
+            >
+                <Route path="/dashboard" element={<HomePage />} />
+                <Route path="/incidents" element={<PlaceholderPage title="Incidents" />} />
+                <Route path="/catalog" element={<PlaceholderPage title="Service Catalog" />} />
+                <Route path="/knowledge" element={<PlaceholderPage title="Knowledge" />} />
+                <Route path="/requests" element={<PlaceholderPage title="Requests" />} />
+                <Route path="/administration/users" element={<PlaceholderPage title="Users" />} />
+            </Route>
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+    )
 }

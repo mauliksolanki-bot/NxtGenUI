@@ -100,17 +100,73 @@
   color: #243447;
   text-decoration: none;
   font-size: 0.925rem;
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.nav-link-row {
+  display: flex;
+  align-items: stretch;
+  border-radius: 0;
+}
+
+.nav-link-row:hover {
+  background: #e4eef6;
+}
+
+.nav-link-row:hover .nav-link,
+.nav-link-row:hover .nav-toggle {
+  color: #1a466b;
+}
+
+.nav-link-row .nav-link,
+.nav-link-row .nav-link-static {
+  flex: 1;
 }
 
 .nav-link-static {
   cursor: default;
 }
 
-.nav-link:hover,
 .nav-link.active {
   background: #e4eef6;
   color: #1a466b;
   font-weight: 600;
+}
+
+.nav-link-row:has(.nav-link.active) {
+  background: #e4eef6;
+}
+
+.nav-link-row:has(.nav-link.active) .nav-toggle {
+  color: #1a466b;
+}
+
+.nav-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  border: 0;
+  background: transparent;
+  color: #6b7686;
+  cursor: pointer;
+}
+
+.nav-toggle svg {
+  width: 0.85rem;
+  height: 0.85rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.15s ease;
+}
+
+.nav-toggle-open svg {
+  transform: rotate(90deg);
 }
 
 .nav-group + .nav-group {
