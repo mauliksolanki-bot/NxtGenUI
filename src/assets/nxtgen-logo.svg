@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-labelledby="nxtgenLogoTitle">
+  <title id="nxtgenLogoTitle">NxtGen</title>
+  <defs>
+    <linearGradient id="nxtgenMarkBg" x1="8" y1="4" x2="60" y2="62" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2E7AA8"/>
+      <stop offset="1" stop-color="#143A58"/>
+    </linearGradient>
+    <linearGradient id="nxtgenMarkAccent" x1="18" y1="14" x2="50" y2="50" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C9F0E3"/>
+      <stop offset="1" stop-color="#81B5A1"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#nxtgenMarkBg)"/>
+  <path d="M18 46V18h9.2L40.4 34.8V18H46v28h-9.2L23.6 29.2V46H18Z" fill="url(#nxtgenMarkAccent)"/>
+  <circle cx="46" cy="18" r="3.6" fill="#F4FBF8"/>
+  <circle cx="18" cy="46" r="2.2" fill="#81B5A1" opacity="0.85"/>
+</svg>
