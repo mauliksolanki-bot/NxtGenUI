@@ -13,7 +13,7 @@
   padding: 2.4rem 3rem 3rem;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: center;
 }
 
 .login-aurora {
@@ -49,6 +49,7 @@
   position: relative;
   z-index: 1;
   max-width: 36rem;
+  margin-bottom: 8vh;
 }
 
 .eyebrow {
