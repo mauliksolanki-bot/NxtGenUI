@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { clearNavMenuCache, getNavMenu, logout } from '../api/client.js'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { clearGridCache, clearNavMenuCache, getNavMenu, logout } from '../api/client.js'
 import Logo from '../components/Logo.jsx'
 import { clearSession, getAuthToken, getSession } from '../auth/session.js'
 import { useToast } from '../components/toast/ToastProvider.jsx'
@@ -40,13 +40,30 @@ const NAV_ICONS = {
   ),
 }
 
+function containsActivePath(item, pathname) {
+  if (item.menuUrl && pathname.startsWith(item.menuUrl)) {
+    return true
+  }
+
+  return Array.isArray(item.children) && item.children.some((child) => containsActivePath(child, pathname))
+}
+
 function NavMenuItem({ item, level = 0 }) {
   const label = item.menuDisplayName || item.menuName
   const icon = level === 0 ? NAV_ICONS[item.menuCode] || NAV_ICONS.DEFAULT : null
   const hasChildren = Array.isArray(item.children) && item.children.length > 0
   const className = level === 0 ? 'nav-link' : 'nav-link nav-link-child'
   const isHome = item.menuUrl === '/dashboard'
-  const [isExpanded, setIsExpanded] = useState(false)
+  const location = useLocation()
+  const isActiveBranch = useMemo(() => containsActivePath(item, location.pathname), [item, location.pathname])
+  const [isExpanded, setIsExpanded] = useState(isActiveBranch)
+
+  useEffect(() => {
+    if (isActiveBranch) {
+      setIsExpanded(true)
+    }
+  }, [isActiveBranch])
+
   const content = (
       <>
         {icon ? <span className="nav-icon">{icon}</span> : null}
@@ -177,6 +194,7 @@ export default function AppShell() {
     } finally {
       clearSession()
       clearNavMenuCache()
+      clearGridCache()
       setIsLoggingOut(false)
       toast.success(toSafeUserMessage('You have been logged out successfully.'))
       navigate('/login', { replace: true })

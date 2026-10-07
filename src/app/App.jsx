@@ -4,6 +4,7 @@ import AppShell from './layout/AppShell.jsx'
 import HomePage from './pages/home/HomePage.jsx'
 import LoginPage from './pages/login/LoginPage.jsx'
 import PlaceholderPage from './pages/placeholder/PlaceholderPage.jsx'
+import UsersPage from './pages/administration/users/UsersPage.jsx'
 
 export default function App() {
     return (
@@ -21,7 +22,7 @@ export default function App() {
                 <Route path="/catalog" element={<PlaceholderPage title="Service Catalog" />} />
                 <Route path="/knowledge" element={<PlaceholderPage title="Knowledge" />} />
                 <Route path="/requests" element={<PlaceholderPage title="Requests" />} />
-                <Route path="/administration/users" element={<PlaceholderPage title="Users" />} />
+                <Route path="/administration/users" element={<UsersPage />} />
             </Route>
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="*" element={<Navigate to="/login" replace />} />

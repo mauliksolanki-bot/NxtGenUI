@@ -68,3 +68,47 @@ export function login(credentials) {
 export function logout(token) {
   return apiPost('/api/logout', {}, { token })
 }
+
+const gridConfigRequests = new Map()
+const gridDataRequests = new Map()
+
+// De-dupes concurrent/duplicate calls per gridName (e.g. React StrictMode
+// double-invoking effects in development) so each grid is only fetched once at a time.
+export function getGridConfig(gridName, token) {
+  if (!gridConfigRequests.has(gridName)) {
+    gridConfigRequests.set(
+        gridName,
+        apiGet(`/api/gridconfig?gridName=${encodeURIComponent(gridName)}`, { token }).catch((error) => {
+          gridConfigRequests.delete(gridName)
+          throw error
+        })
+    )
+  }
+
+  return gridConfigRequests.get(gridName)
+}
+
+export function getGridData(gridName, token) {
+  if (!gridDataRequests.has(gridName)) {
+    gridDataRequests.set(
+        gridName,
+        apiGet(`/api/griddata?gridName=${encodeURIComponent(gridName)}`, { token }).catch((error) => {
+          gridDataRequests.delete(gridName)
+          throw error
+        })
+    )
+  }
+
+  return gridDataRequests.get(gridName)
+}
+
+export function clearGridCache(gridName) {
+  if (gridName) {
+    gridConfigRequests.delete(gridName)
+    gridDataRequests.delete(gridName)
+    return
+  }
+
+  gridConfigRequests.clear()
+  gridDataRequests.clear()
+}
