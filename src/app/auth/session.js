@@ -16,3 +16,7 @@ export function setSession(user) {
 export function clearSession() {
   sessionStorage.removeItem(SESSION_KEY)
 }
+
+export function getAuthToken() {
+  return getSession()?.token ?? null
+}

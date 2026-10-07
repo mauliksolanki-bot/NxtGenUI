@@ -1,9 +1,9 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import RequireSession from './auth/RequireSession.jsx'
 import AppShell from './layout/AppShell.jsx'
-import HomePage from './pages/HomePage.jsx'
-import LoginPage from './pages/LoginPage.jsx'
-import PlaceholderPage from './pages/PlaceholderPage.jsx'
+import HomePage from './pages/home/HomePage.jsx'
+import LoginPage from './pages/login/LoginPage.jsx'
+import PlaceholderPage from './pages/placeholder/PlaceholderPage.jsx'
 
 export default function App() {
   return (

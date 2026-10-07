@@ -138,18 +138,6 @@
   font-size: 0.78rem;
 }
 
-.card-one {
-  top: 18%;
-  right: 11%;
-  animation: float-y 6.5s ease-in-out infinite;
-}
-
-.card-two {
-  top: 42%;
-  right: 28%;
-  animation: float-y 7.5s ease-in-out infinite reverse;
-}
-
 .login-panel {
   display: flex;
   flex-direction: column;

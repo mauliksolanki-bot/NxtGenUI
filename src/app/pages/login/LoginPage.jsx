@@ -1,18 +1,22 @@
 import { useMemo, useState } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
-import Logo from '../components/Logo.jsx'
-import { getSession, setSession } from '../auth/session.js'
+import Logo from '../../components/Logo.jsx'
+import { login } from '../../api/client.js'
+import { getSession, setSession } from '../../auth/session.js'
+import { useToast } from '../../components/toast/ToastProvider.jsx'
+import { toSafeUserMessage } from '../../utils/toSafeUserMessage.js'
 import './LoginPage.css'
 
 export default function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
+  const toast = useToast()
   const existingSession = getSession()
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const destination = location.state?.from?.pathname || '/home'
 
   const year = useMemo(() => new Date().getFullYear(), [])
@@ -21,21 +25,39 @@ export default function LoginPage() {
     return <Navigate to={destination} replace />
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
 
-    const trimmedEmail = email.trim()
-    if (!trimmedEmail || !password) {
-      setError('Enter your work email and password to continue.')
+    const trimmedUsername = username.trim()
+    if (!trimmedUsername || !password) {
+      toast.error(toSafeUserMessage('Enter your username and password to continue.'))
       return
     }
 
-    setError('')
-    setSession({
-      email: trimmedEmail,
-      remember,
-    })
-    navigate(destination, { replace: true })
+    setIsSubmitting(true)
+
+    try {
+      const response = await login({
+        username: trimmedUsername,
+        password,
+        rememberMe: remember,
+      })
+
+      setSession({
+        username: response.username,
+        displayName: response.displayName,
+        supAdmin: response.supAdmin,
+        token: response.token,
+        tokenType: response.tokenType,
+        remember,
+      })
+      toast.success('Signed in successfully.')
+      navigate(destination, { replace: true })
+    } catch (requestError) {
+      toast.error(toSafeUserMessage(requestError))
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -88,16 +110,6 @@ export default function LoginPage() {
           </ul>
         </div>
 
-        <figure className="floating-card card-one">
-          <span className="card-kicker">INC0001842</span>
-          <strong>VPN access restored</strong>
-          <em>Priority 2 · Assigned</em>
-        </figure>
-        <figure className="floating-card card-two">
-          <span className="card-kicker">Catalog</span>
-          <strong>Laptop refresh</strong>
-          <em>Awaiting approval</em>
-        </figure>
       </section>
 
       <section className="login-panel">
@@ -109,21 +121,15 @@ export default function LoginPage() {
           <p className="login-subtitle">Use your organization account to open the workspace.</p>
 
           <form className="login-form" onSubmit={handleSubmit} noValidate>
-            {error ? (
-              <p className="login-error" role="alert">
-                {error}
-              </p>
-            ) : null}
-
-            <label htmlFor="email">Work email</label>
+            <label htmlFor="username">Username</label>
             <input
-              id="email"
-              name="email"
-              type="email"
+              id="username"
+              name="username"
+              type="text"
               autoComplete="username"
-              placeholder="you@nxtgen.com"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              placeholder="Enter your username"
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
             />
 
             <label htmlFor="password">Password</label>
@@ -158,8 +164,8 @@ export default function LoginPage() {
               <span className="quiet-link">Forgot password</span>
             </div>
 
-            <button type="submit" className="sign-in">
-              Continue
+            <button type="submit" className="sign-in" disabled={isSubmitting}>
+              {isSubmitting ? 'Signing in...' : 'Continue'}
             </button>
           </form>
 
