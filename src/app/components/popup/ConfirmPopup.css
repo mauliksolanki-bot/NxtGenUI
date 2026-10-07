@@ -1,0 +1,64 @@
+.confirm-popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 32, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.confirm-popup {
+    background: #fff;
+    border-radius: 10px;
+    padding: 1.5rem 1.75rem;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 12px 32px rgba(15, 23, 32, 0.2);
+}
+
+.confirm-popup-message {
+    margin: 0 0 1.25rem;
+    color: #243447;
+    font-size: 0.95rem;
+}
+
+.confirm-popup-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+.confirm-popup-yes,
+.confirm-popup-no {
+    border-radius: 8px;
+    padding: 0.5rem 1.2rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.confirm-popup-yes {
+    background: #b3261e;
+    color: #fff;
+}
+
+.confirm-popup-yes:hover {
+    background: #8f1e18;
+}
+
+.confirm-popup-yes:disabled,
+.confirm-popup-no:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.confirm-popup-no {
+    background: #fff;
+    color: #1a466b;
+    border-color: #d9d0c4;
+}
+
+.confirm-popup-no:hover {
+    background: #f4f5f7;
+}

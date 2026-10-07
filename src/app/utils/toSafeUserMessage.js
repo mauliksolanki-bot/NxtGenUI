@@ -12,6 +12,8 @@ const SAFE_MESSAGES = new Set([
   'Please correct the highlighted fields.',
   'User created successfully.',
   'Unable to create user right now.',
+  'User deleted successfully.',
+  'Unable to delete user right now.',
 ])
 
 export function toSafeUserMessage(error) {

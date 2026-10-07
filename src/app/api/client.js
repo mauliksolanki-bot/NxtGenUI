@@ -20,7 +20,7 @@ function buildAuthHeader(token) {
 
 export async function apiGet(path, options = {}) {
   const authHeaders = options.token ? buildAuthHeader(options.token) : {}
-  const response = await fetch(`${API_BASE_URL}${path}`, { headers: authHeaders })
+  const response = await fetch(`${API_BASE_URL}${path}`, { headers: authHeaders, cache: 'no-store' })
 
   if (!response.ok) {
     throw buildHttpError(await parseErrorBody(response), response.status)
@@ -128,4 +128,26 @@ export function validateUserData(payload, token) {
 
 export function createNewUser(payload, token) {
   return apiPost('/api/createnewuser', payload, { token })
+}
+
+export function deleteUser(id, token) {
+  return apiPost(`/api/deleteuser?id=${encodeURIComponent(id)}`, {}, { token })
+}
+
+const popupConfigRequests = new Map()
+
+// De-dupes concurrent/duplicate calls per popupName (e.g. React StrictMode
+// double-invoking effects in development) so each popup is only fetched once at a time.
+export function getPopupConfig(popupName, token) {
+  if (!popupConfigRequests.has(popupName)) {
+    const request = apiGet(`/api/popupconfig?popupName=${encodeURIComponent(popupName)}`, { token })
+    popupConfigRequests.set(
+        popupName,
+        request.finally(() => {
+          popupConfigRequests.delete(popupName)
+        })
+    )
+  }
+
+  return popupConfigRequests.get(popupName)
 }

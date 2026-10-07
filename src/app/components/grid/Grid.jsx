@@ -4,7 +4,7 @@ import { getAuthToken } from '../../auth/session.js'
 import { toSafeUserMessage } from '../../utils/toSafeUserMessage.js'
 import './Grid.css'
 
-export default function Grid({ gridName, renderActions }) {
+export default function Grid({ gridName, renderActions, refreshToken }) {
     const [config, setConfig] = useState(null)
     const [rows, setRows] = useState([])
     const [isLoading, setIsLoading] = useState(true)
@@ -43,7 +43,7 @@ export default function Grid({ gridName, renderActions }) {
         return () => {
             isMounted = false
         }
-    }, [gridName])
+    }, [gridName, refreshToken])
 
     if (isLoading) {
         return <p className="grid-status">{config?.loadingMessage ?? 'Loading...'}</p>

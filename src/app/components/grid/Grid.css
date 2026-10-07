@@ -69,3 +69,11 @@
 .grid-action-button:hover {
     background: #e4eef6;
 }
+
+.grid-action-button-danger {
+    color: #b3261e;
+}
+
+.grid-action-button-danger:hover {
+    background: #fbe7e5;
+}
