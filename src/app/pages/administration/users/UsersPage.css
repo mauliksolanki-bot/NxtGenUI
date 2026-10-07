@@ -1,0 +1,29 @@
+.page-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.create-user-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: none;
+  background: #1a466b;
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.55rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.create-user-button svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.create-user-button:hover {
+  background: #15395a;
+}

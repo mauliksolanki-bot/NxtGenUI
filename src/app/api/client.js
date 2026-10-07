@@ -1,12 +1,17 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
 
-async function parseErrorMessage(response) {
+async function parseErrorBody(response) {
   try {
-    const body = await response.json()
-    return body?.message || `Request failed: ${response.status}`
+    return await response.json()
   } catch {
-    return `Request failed: ${response.status}`
+    return null
   }
+}
+
+function buildHttpError(body, status) {
+  const error = new Error(body?.message || `Request failed: ${status}`)
+  error.details = body
+  return error
 }
 
 function buildAuthHeader(token) {
@@ -18,7 +23,7 @@ export async function apiGet(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, { headers: authHeaders })
 
   if (!response.ok) {
-    throw new Error(await parseErrorMessage(response))
+    throw buildHttpError(await parseErrorBody(response), response.status)
   }
 
   return response.json()
@@ -36,7 +41,7 @@ export async function apiPost(path, body, options = {}) {
   })
 
   if (!response.ok) {
-    throw new Error(await parseErrorMessage(response))
+    throw buildHttpError(await parseErrorBody(response), response.status)
   }
 
   return response.json()
@@ -111,4 +116,16 @@ export function clearGridCache(gridName) {
 
   gridConfigRequests.clear()
   gridDataRequests.clear()
+}
+
+export function getFormConfig(formName, token) {
+  return apiGet(`/api/formconfig?formName=${encodeURIComponent(formName)}`, { token })
+}
+
+export function validateUserData(payload, token) {
+  return apiPost('/api/validateuserdata', payload, { token })
+}
+
+export function createNewUser(payload, token) {
+  return apiPost('/api/createnewuser', payload, { token })
 }

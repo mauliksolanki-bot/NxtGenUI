@@ -1,0 +1,121 @@
+.nxtgen-form-wrapper {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #d8dee6;
+    border-radius: 10px;
+    background: #fff;
+    padding: 1.5rem 1.75rem;
+}
+
+.nxtgen-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 1.5rem;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-field-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #3d454e;
+    margin-bottom: 0.3rem;
+}
+
+.form-field-mandatory {
+    color: #b3261e;
+    margin-left: 0.2rem;
+}
+
+.form-field-input,
+.form-field-select {
+    border: 1px solid #d9d0c4;
+    border-radius: 8px;
+    padding: 0.55rem 0.7rem;
+    font-size: 0.9rem;
+    color: #243447;
+    background: #fff;
+}
+
+.form-field-input:focus,
+.form-field-select:focus {
+    outline: none;
+    border-color: #1a466b;
+}
+
+.form-field-input[readonly] {
+    background: #f4f5f7;
+    color: #6b7686;
+}
+
+.form-field-select:disabled {
+    background: #f4f5f7;
+    color: #6b7686;
+    opacity: 1;
+    cursor: not-allowed;
+}
+
+.form-field-error {
+    color: #b3261e;
+    font-size: 0.78rem;
+    margin-top: 0.3rem;
+}
+
+.form-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.form-submit-button,
+.form-clear-button {
+    border-radius: 8px;
+    padding: 0.6rem 1.4rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.form-submit-button {
+    background: #1a466b;
+    color: #fff;
+}
+
+.form-submit-button:hover {
+    background: #15395a;
+}
+
+.form-submit-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.form-clear-button {
+    background: #fff;
+    color: #1a466b;
+    border-color: #d9d0c4;
+}
+
+.form-clear-button:hover {
+    background: #f4f5f7;
+}
+
+.grid-status {
+    padding: 1rem;
+    color: #6b7686;
+}
+
+.grid-status-error {
+    color: #8a2b2b;
+}
+
+@media (max-width: 720px) {
+    .nxtgen-form-grid {
+        grid-template-columns: 1fr;
+    }
+}

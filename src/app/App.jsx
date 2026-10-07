@@ -5,6 +5,7 @@ import HomePage from './pages/home/HomePage.jsx'
 import LoginPage from './pages/login/LoginPage.jsx'
 import PlaceholderPage from './pages/placeholder/PlaceholderPage.jsx'
 import UsersPage from './pages/administration/users/UsersPage.jsx'
+import CreateUserPage from './pages/administration/createuser/CreateUserPage.jsx'
 
 export default function App() {
     return (
@@ -23,6 +24,7 @@ export default function App() {
                 <Route path="/knowledge" element={<PlaceholderPage title="Knowledge" />} />
                 <Route path="/requests" element={<PlaceholderPage title="Requests" />} />
                 <Route path="/administration/users" element={<UsersPage />} />
+                <Route path="/administration/createuser" element={<CreateUserPage />} />
             </Route>
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="*" element={<Navigate to="/login" replace />} />

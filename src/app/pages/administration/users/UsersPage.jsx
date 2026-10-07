@@ -1,9 +1,25 @@
+import { useNavigate } from 'react-router-dom'
 import Grid from '../../../components/grid/Grid.jsx'
+import './UsersPage.css'
 
 export default function UsersPage() {
+    const navigate = useNavigate()
+
     return (
         <section>
-            <h1>Users</h1>
+            <div className="page-header-row">
+                <h1>Users</h1>
+                <button
+                    type="button"
+                    className="create-user-button"
+                    onClick={() => navigate('/administration/createuser')}
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M15 4a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM4 20a7 7 0 0 1 11-5.7V16h-1a2 2 0 0 0-2 2v2H6a2 2 0 0 1-2-2zm15-3h2v2h2v2h-2v2h-2v-2h-2v-2h2z" />
+                    </svg>
+                    Create User
+                </button>
+            </div>
             <Grid
                 gridName="USERS_GRID"
                 renderActions={() => (
