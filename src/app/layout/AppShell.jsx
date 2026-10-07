@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
-import { getNavMenu } from '../api/client.js'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { clearNavMenuCache, getNavMenu, logout } from '../api/client.js'
 import Logo from '../components/Logo.jsx'
-import { getSession } from '../auth/session.js'
+import { clearSession, getAuthToken, getSession } from '../auth/session.js'
 import { useToast } from '../components/toast/ToastProvider.jsx'
 import { toSafeUserMessage } from '../utils/toSafeUserMessage.js'
 import './AppShell.css'
@@ -40,7 +40,7 @@ function NavMenuItem({ item, level = 0 }) {
   const icon = level === 0 ? NAV_ICONS[item.menuCode] || NAV_ICONS.DEFAULT : null
   const hasChildren = Array.isArray(item.children) && item.children.length > 0
   const className = level === 0 ? 'nav-link' : 'nav-link nav-link-child'
-  const isHome = item.menuUrl === '/home'
+  const isHome = item.menuUrl === '/dashboard'
   const content = (
     <>
       {icon ? <span className="nav-icon">{icon}</span> : null}
@@ -74,16 +74,18 @@ function NavMenuItem({ item, level = 0 }) {
 
 export default function AppShell() {
   const toast = useToast()
+  const navigate = useNavigate()
   const [navItems, setNavItems] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   useEffect(() => {
     let isMounted = true
 
     async function loadNavMenu() {
       try {
-        const items = await getNavMenu()
+        const items = await getNavMenu(getAuthToken())
         if (isMounted) {
           setNavItems(items)
           setError('')
@@ -120,6 +122,29 @@ export default function AppShell() {
     return navItems.map((item) => <NavMenuItem key={item.id} item={item} />)
   }, [error, isLoading, navItems])
 
+  async function handleLogout() {
+    if (isLoggingOut) {
+      return
+    }
+
+    setIsLoggingOut(true)
+    const token = getAuthToken()
+
+    try {
+      if (token) {
+        await logout(token)
+      }
+    } catch {
+      // Best-effort server-side invalidation; proceed with client-side logout regardless.
+    } finally {
+      clearSession()
+      clearNavMenuCache()
+      setIsLoggingOut(false)
+      toast.success(toSafeUserMessage('You have been logged out successfully.'))
+      navigate('/login', { replace: true })
+    }
+  }
+
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -133,6 +158,14 @@ export default function AppShell() {
           <span className="user-chip">
             {getSession()?.displayName ?? getSession()?.username ?? 'Guest'}
           </span>
+          <button
+            type="button"
+            className="logout-button"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+          >
+            {isLoggingOut ? 'Logging out...' : 'Logout'}
+          </button>
         </div>
       </header>
       <div className="app-body">

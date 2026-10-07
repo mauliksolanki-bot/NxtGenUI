@@ -9,8 +9,13 @@ async function parseErrorMessage(response) {
   }
 }
 
-export async function apiGet(path) {
-  const response = await fetch(`${API_BASE_URL}${path}`)
+function buildAuthHeader(token) {
+  return { Authorization: ['Bearer', token].join(' ') }
+}
+
+export async function apiGet(path, options = {}) {
+  const authHeaders = options.token ? buildAuthHeader(options.token) : {}
+  const response = await fetch(`${API_BASE_URL}${path}`, { headers: authHeaders })
 
   if (!response.ok) {
     throw new Error(await parseErrorMessage(response))
@@ -19,11 +24,15 @@ export async function apiGet(path) {
   return response.json()
 }
 
-export async function apiPost(path, body) {
+export async function apiPost(path, body, options = {}) {
+  const authHeaders = options.token ? buildAuthHeader(options.token) : {}
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    headers: {
+      'Content-Type': 'application/json',
+      ...authHeaders,
+    },
+    body: JSON.stringify(body ?? {}),
   })
 
   if (!response.ok) {
@@ -33,10 +42,29 @@ export async function apiPost(path, body) {
   return response.json()
 }
 
-export function getNavMenu() {
-  return apiGet('/api/navmenu')
+let navMenuRequest = null
+
+// De-dupes concurrent/duplicate calls (e.g. React StrictMode double-invoking
+// effects in development) so the nav menu is only ever fetched once at a time.
+export function getNavMenu(token) {
+  if (!navMenuRequest) {
+    navMenuRequest = apiGet('/api/navmenu', { token }).catch((error) => {
+      navMenuRequest = null
+      throw error
+    })
+  }
+
+  return navMenuRequest
+}
+
+export function clearNavMenuCache() {
+  navMenuRequest = null
 }
 
 export function login(credentials) {
   return apiPost('/api/login', credentials)
+}
+
+export function logout(token) {
+  return apiPost('/api/logout', {}, { token })
 }

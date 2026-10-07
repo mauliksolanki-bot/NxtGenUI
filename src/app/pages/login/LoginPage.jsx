@@ -17,7 +17,7 @@ export default function LoginPage() {
   const [remember, setRemember] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const destination = location.state?.from?.pathname || '/home'
+  const destination = location.state?.from?.pathname || '/dashboard'
 
   const year = useMemo(() => new Date().getFullYear(), [])
 

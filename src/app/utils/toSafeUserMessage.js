@@ -8,6 +8,7 @@ const SAFE_MESSAGES = new Set([
   'Invalid username or password.',
   'Enter your username and password to continue.',
   'Navigation menu is unavailable right now.',
+  'You have been logged out successfully.',
 ])
 
 export function toSafeUserMessage(error) {

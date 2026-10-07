@@ -16,7 +16,7 @@ export default function App() {
           </RequireSession>
         }
       >
-        <Route path="/home" element={<HomePage />} />
+        <Route path="/dashboard" element={<HomePage />} />
         <Route path="/incidents" element={<PlaceholderPage title="Incidents" />} />
         <Route path="/catalog" element={<PlaceholderPage title="Service Catalog" />} />
         <Route path="/knowledge" element={<PlaceholderPage title="Knowledge" />} />
