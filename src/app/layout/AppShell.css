@@ -1,0 +1,219 @@
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  display: grid;
+  grid-template-columns: 220px 1fr auto;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0 1.25rem;
+  height: 56px;
+  background: #1a466b;
+  color: #fff;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+}
+
+.app-header .brand-logo-mark {
+  box-shadow: none;
+}
+
+.app-header .brand-logo-word {
+  font-size: 1.05rem;
+}
+
+.global-search input {
+  width: min(520px, 100%);
+  height: 32px;
+  border: 0;
+  border-radius: 4px;
+  padding: 0 0.75rem;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.global-search input::placeholder {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.user-chip {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.logout-button {
+  font-size: 0.8rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.logout-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.logout-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.app-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  min-height: 0;
+}
+
+.app-nav {
+  background: #f4f5f7;
+  border-right: 1px solid #d8dee6;
+  padding: 0.75rem 0;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.7rem 1.1rem;
+  color: #243447;
+  text-decoration: none;
+  font-size: 0.925rem;
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.nav-link-row {
+  display: flex;
+  align-items: stretch;
+  border-radius: 0;
+}
+
+.nav-link-row:hover {
+  background: #e4eef6;
+}
+
+.nav-link-row:hover .nav-link,
+.nav-link-row:hover .nav-toggle {
+  color: #1a466b;
+}
+
+.nav-link-row .nav-link,
+.nav-link-row .nav-link-static {
+  flex: 1;
+}
+
+.nav-link-static {
+  cursor: default;
+}
+
+.nav-link.active {
+  background: #e4eef6;
+  color: #1a466b;
+  font-weight: 600;
+}
+
+.nav-link-row:has(.nav-link.active) {
+  background: #e4eef6;
+}
+
+.nav-link-row:has(.nav-link.active) .nav-toggle {
+  color: #1a466b;
+}
+
+.nav-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  border: 0;
+  background: transparent;
+  color: #6b7686;
+  cursor: pointer;
+}
+
+.nav-toggle svg {
+  width: 0.85rem;
+  height: 0.85rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.15s ease;
+}
+
+.nav-toggle-open svg {
+  transform: rotate(90deg);
+}
+
+.nav-group + .nav-group {
+  margin-top: 0.1rem;
+}
+
+.nav-children {
+  padding: 0.2rem 0 0.35rem;
+}
+
+.nav-link-child {
+  padding-left: 2.95rem;
+  font-size: 0.89rem;
+}
+
+.nav-icon {
+  width: 1rem;
+  height: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  flex: 0 0 1rem;
+}
+
+.nav-icon svg {
+  width: 1rem;
+  height: 1rem;
+  fill: currentColor;
+}
+
+.nav-label {
+  min-width: 0;
+}
+
+.nav-status {
+  margin: 0;
+  padding: 0.7rem 1.1rem;
+  color: #536273;
+  font-size: 0.9rem;
+}
+
+.nav-status-error {
+  color: #9d3131;
+}
+
+.app-main {
+  padding: 1.5rem 2rem;
+  background: #fff;
+}

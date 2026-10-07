@@ -1,0 +1,131 @@
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
+
+async function parseErrorBody(response) {
+  try {
+    return await response.json()
+  } catch {
+    return null
+  }
+}
+
+function buildHttpError(body, status) {
+  const error = new Error(body?.message || `Request failed: ${status}`)
+  error.details = body
+  return error
+}
+
+function buildAuthHeader(token) {
+  return { Authorization: ['Bearer', token].join(' ') }
+}
+
+export async function apiGet(path, options = {}) {
+  const authHeaders = options.token ? buildAuthHeader(options.token) : {}
+  const response = await fetch(`${API_BASE_URL}${path}`, { headers: authHeaders })
+
+  if (!response.ok) {
+    throw buildHttpError(await parseErrorBody(response), response.status)
+  }
+
+  return response.json()
+}
+
+export async function apiPost(path, body, options = {}) {
+  const authHeaders = options.token ? buildAuthHeader(options.token) : {}
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...authHeaders,
+    },
+    body: JSON.stringify(body ?? {}),
+  })
+
+  if (!response.ok) {
+    throw buildHttpError(await parseErrorBody(response), response.status)
+  }
+
+  return response.json()
+}
+
+let navMenuRequest = null
+
+// De-dupes concurrent/duplicate calls (e.g. React StrictMode double-invoking
+// effects in development) so the nav menu is only ever fetched once at a time.
+export function getNavMenu(token) {
+  if (!navMenuRequest) {
+    navMenuRequest = apiGet('/api/navmenu', { token }).catch((error) => {
+      navMenuRequest = null
+      throw error
+    })
+  }
+
+  return navMenuRequest
+}
+
+export function clearNavMenuCache() {
+  navMenuRequest = null
+}
+
+export function login(credentials) {
+  return apiPost('/api/login', credentials)
+}
+
+export function logout(token) {
+  return apiPost('/api/logout', {}, { token })
+}
+
+const gridConfigRequests = new Map()
+const gridDataRequests = new Map()
+
+// De-dupes concurrent/duplicate calls per gridName (e.g. React StrictMode
+// double-invoking effects in development) so each grid is only fetched once at a time.
+export function getGridConfig(gridName, token) {
+  if (!gridConfigRequests.has(gridName)) {
+    gridConfigRequests.set(
+        gridName,
+        apiGet(`/api/gridconfig?gridName=${encodeURIComponent(gridName)}`, { token }).catch((error) => {
+          gridConfigRequests.delete(gridName)
+          throw error
+        })
+    )
+  }
+
+  return gridConfigRequests.get(gridName)
+}
+
+export function getGridData(gridName, token) {
+  if (!gridDataRequests.has(gridName)) {
+    gridDataRequests.set(
+        gridName,
+        apiGet(`/api/griddata?gridName=${encodeURIComponent(gridName)}`, { token }).catch((error) => {
+          gridDataRequests.delete(gridName)
+          throw error
+        })
+    )
+  }
+
+  return gridDataRequests.get(gridName)
+}
+
+export function clearGridCache(gridName) {
+  if (gridName) {
+    gridConfigRequests.delete(gridName)
+    gridDataRequests.delete(gridName)
+    return
+  }
+
+  gridConfigRequests.clear()
+  gridDataRequests.clear()
+}
+
+export function getFormConfig(formName, token) {
+  return apiGet(`/api/formconfig?formName=${encodeURIComponent(formName)}`, { token })
+}
+
+export function validateUserData(payload, token) {
+  return apiPost('/api/validateuserdata', payload, { token })
+}
+
+export function createNewUser(payload, token) {
+  return apiPost('/api/createnewuser', payload, { token })
+}
