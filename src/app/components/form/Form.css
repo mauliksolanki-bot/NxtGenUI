@@ -32,6 +32,8 @@
 
 .form-field-input,
 .form-field-select {
+    width: 100%;
+    box-sizing: border-box;
     border: 1px solid #d9d0c4;
     border-radius: 8px;
     padding: 0.55rem 0.7rem;
@@ -62,6 +64,151 @@
     color: #b3261e;
     font-size: 0.78rem;
     margin-top: 0.3rem;
+}
+
+.form-field-search {
+    position: relative;
+    width: 100%;
+}
+
+.form-field-search-results {
+    position: absolute;
+    z-index: 10;
+    top: calc(100% + 0.25rem);
+    left: 0;
+    right: 0;
+    max-height: 220px;
+    overflow-y: auto;
+    margin: 0;
+    padding: 0.25rem;
+    list-style: none;
+    background: #fff;
+    border: 1px solid #d9d0c4;
+    border-radius: 8px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.form-field-search-result {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.5rem 0.6rem;
+    border: none;
+    background: transparent;
+    color: #243447;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.form-field-search-result:hover {
+    background: #f4f5f7;
+}
+
+.form-field-multiselect {
+    position: relative;
+    width: 100%;
+}
+
+.form-field-multiselect-trigger {
+    cursor: pointer;
+    min-height: 2.3rem;
+}
+
+.form-field-multiselect-placeholder {
+    color: #8a93a0;
+    font-size: 0.9rem;
+}
+
+.form-field-multiselect-options {
+    position: absolute;
+    z-index: 10;
+    top: calc(100% + 0.25rem);
+    left: 0;
+    right: 0;
+    max-height: 220px;
+    overflow-y: auto;
+    margin: 0;
+    padding: 0.25rem;
+    list-style: none;
+    background: #fff;
+    border: 1px solid #d9d0c4;
+    border-radius: 8px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.form-field-multiselect-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.6rem;
+    font-size: 0.85rem;
+    color: #243447;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.form-field-multiselect-option:hover {
+    background: #f4f5f7;
+}
+
+.form-field-search-multi-box {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #d9d0c4;
+    border-radius: 8px;
+    padding: 0.4rem 0.5rem;
+    background: #fff;
+}
+
+.form-field-search-multi-box:focus-within {
+    border-color: #1a466b;
+}
+
+.form-field-search-multi-input {
+    flex: 1 1 120px;
+    min-width: 80px;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 0.9rem;
+    color: #243447;
+    padding: 0.2rem;
+}
+
+.form-field-search-multi-input[readonly] {
+    background: transparent;
+    color: #6b7686;
+}
+
+.form-field-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: #eef2f6;
+    border: 1px solid #d9d0c4;
+    border-radius: 999px;
+    padding: 0.2rem 0.4rem 0.2rem 0.6rem;
+    font-size: 0.8rem;
+    color: #243447;
+}
+
+.form-field-chip-remove {
+    border: none;
+    background: transparent;
+    color: #6b7686;
+    cursor: pointer;
+    font-size: 0.85rem;
+    line-height: 1;
+    padding: 0 0.15rem;
+}
+
+.form-field-chip-remove:hover {
+    color: #b3261e;
 }
 
 .form-actions {

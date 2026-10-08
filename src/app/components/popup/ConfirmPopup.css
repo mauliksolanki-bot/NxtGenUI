@@ -17,6 +17,16 @@
     box-shadow: 0 12px 32px rgba(15, 23, 32, 0.2);
 }
 
+.confirm-popup-title {
+    margin: 0 0 0.75rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid #e3e7ec;
+    color: #1a466b;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
 .confirm-popup-message {
     margin: 0 0 1.25rem;
     color: #243447;

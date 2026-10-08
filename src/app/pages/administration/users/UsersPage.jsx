@@ -68,7 +68,13 @@ export default function UsersPage() {
                 refreshToken={refreshToken}
                 renderActions={(row) => (
                     <>
-                        <button type="button" className="grid-action-button" title="Edit" aria-label="Edit">
+                        <button
+                            type="button"
+                            className="grid-action-button"
+                            title="Edit"
+                            aria-label="Edit"
+                            onClick={() => navigate(`/administration/edituser/${row.id}`)}
+                        >
                             <svg viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="M4 20.5h4.5l10-10-4.5-4.5-10 10zm13.3-13.3 1.7-1.7a1 1 0 0 1 1.4 0l1.6 1.6a1 1 0 0 1 0 1.4l-1.7 1.7z" />
                             </svg>
@@ -95,6 +101,7 @@ export default function UsersPage() {
             {userPendingDeletion ? (
                 <ConfirmPopup
                     popupName="DELETE_USER_CONFIRM"
+                    fallbackTitle="Delete User"
                     fallbackMessage="Are you sure you want to delete this user?"
                     onConfirm={handleConfirmDelete}
                     onCancel={handleCancelDelete}

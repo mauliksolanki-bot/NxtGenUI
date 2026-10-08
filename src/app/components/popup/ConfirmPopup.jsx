@@ -8,8 +8,9 @@ import './ConfirmPopup.css'
  * NXTGEN_POPUP_CONFIG-backed /api/popupconfig endpoint instead of hard-coding
  * the warning text, so new confirmations only need a DB row to configure.
  */
-export default function ConfirmPopup({ popupName, fallbackMessage, onConfirm, onCancel, isBusy }) {
+export default function ConfirmPopup({ popupName, fallbackMessage, fallbackTitle, onConfirm, onCancel, isBusy }) {
     const [message, setMessage] = useState(fallbackMessage ?? '')
+    const [title, setTitle] = useState(fallbackTitle ?? '')
     const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
@@ -21,6 +22,7 @@ export default function ConfirmPopup({ popupName, fallbackMessage, onConfirm, on
 
                 if (isMounted && config?.enabled) {
                     setMessage(config.displayMsg)
+                    setTitle(config.title ?? '')
                 }
             } catch {
                 // Keep the fallback message if the popup config cannot be loaded.
@@ -50,6 +52,7 @@ export default function ConfirmPopup({ popupName, fallbackMessage, onConfirm, on
                 aria-modal="true"
                 onClick={(event) => event.stopPropagation()}
             >
+                {title ? <h2 className="confirm-popup-title">{title}</h2> : null}
                 <p className="confirm-popup-message">{message}</p>
                 <div className="confirm-popup-actions">
                     <button type="button" className="confirm-popup-yes" onClick={onConfirm} disabled={isBusy}>

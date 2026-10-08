@@ -14,6 +14,17 @@ const SAFE_MESSAGES = new Set([
   'Unable to create user right now.',
   'User deleted successfully.',
   'Unable to delete user right now.',
+  'User is already exist in NxtGen',
+  'Role created successfully.',
+  'Unable to create role right now.',
+  'User updated successfully.',
+  'Unable to update user right now.',
+  'Unable to load user details right now.',
+  'Group created successfully.',
+  'Unable to create group right now.',
+  'Group updated successfully.',
+  'Unable to update group right now.',
+  'Unable to load group details right now.',
 ])
 
 export function toSafeUserMessage(error) {

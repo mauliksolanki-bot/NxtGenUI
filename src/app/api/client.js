@@ -78,14 +78,17 @@ const gridConfigRequests = new Map()
 const gridDataRequests = new Map()
 
 // De-dupes concurrent/duplicate calls per gridName (e.g. React StrictMode
-// double-invoking effects in development) so each grid is only fetched once at a time.
+// double-invoking effects in development) while still refetching fresh data
+// every time a grid is (re)mounted/visited, by clearing the cache entry once
+// the in-flight request settles (success or failure) rather than leaving the
+// resolved promise cached forever.
 export function getGridConfig(gridName, token) {
   if (!gridConfigRequests.has(gridName)) {
+    const request = apiGet(`/api/gridconfig?gridName=${encodeURIComponent(gridName)}`, { token })
     gridConfigRequests.set(
         gridName,
-        apiGet(`/api/gridconfig?gridName=${encodeURIComponent(gridName)}`, { token }).catch((error) => {
+        request.finally(() => {
           gridConfigRequests.delete(gridName)
-          throw error
         })
     )
   }
@@ -95,11 +98,11 @@ export function getGridConfig(gridName, token) {
 
 export function getGridData(gridName, token) {
   if (!gridDataRequests.has(gridName)) {
+    const request = apiGet(`/api/griddata?gridName=${encodeURIComponent(gridName)}`, { token })
     gridDataRequests.set(
         gridName,
-        apiGet(`/api/griddata?gridName=${encodeURIComponent(gridName)}`, { token }).catch((error) => {
+        request.finally(() => {
           gridDataRequests.delete(gridName)
-          throw error
         })
     )
   }
@@ -132,6 +135,46 @@ export function createNewUser(payload, token) {
 
 export function deleteUser(id, token) {
   return apiPost(`/api/deleteuser?id=${encodeURIComponent(id)}`, {}, { token })
+}
+
+export function getUserById(id, token) {
+  return apiGet(`/api/getuserbyid?id=${encodeURIComponent(id)}`, { token })
+}
+
+export function updateUser(payload, token) {
+  return apiPost('/api/updateuser', payload, { token })
+}
+
+export function createNewRole(payload, token) {
+  return apiPost('/api/createnewrole', payload, { token })
+}
+
+export function createGroup(payload, token) {
+  return apiPost('/api/creategroup', payload, { token })
+}
+
+export function searchGroupOwners(query, token) {
+  return apiGet(`/api/searchgroupowners?query=${encodeURIComponent(query)}`, { token })
+}
+
+export function searchGroups(query, token) {
+  return apiGet(`/api/searchgroups?query=${encodeURIComponent(query)}`, { token })
+}
+
+export function getGroupById(id, token) {
+  return apiGet(`/api/getgroupbyid?id=${encodeURIComponent(id)}`, { token })
+}
+
+export function updateGroup(payload, token) {
+  return apiPost('/api/updategroup', payload, { token })
+}
+
+export function searchUserDetails(query, token) {
+  return apiGet(`/api/searchuserdetails?query=${encodeURIComponent(query)}`, { token })
+}
+
+export function fetchUserDetails(id, token) {
+  return apiGet(`/api/fetchuserdetails?id=${encodeURIComponent(id)}`, { token })
 }
 
 const popupConfigRequests = new Map()
