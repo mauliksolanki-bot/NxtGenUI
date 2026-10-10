@@ -12,6 +12,8 @@ import EditUserPage from './pages/administration/edituser/EditUserPage.jsx'
 import CreateRolePage from './pages/administration/createrole/CreateRolePage.jsx'
 import CreateGroupPage from './pages/administration/creategroup/CreateGroupPage.jsx'
 import EditGroupPage from './pages/administration/editgroup/EditGroupPage.jsx'
+import ServiceCatalogPage from './pages/catalog/ServiceCatalogPage.jsx'
+import ServiceSubcategoryPage from './pages/catalog/ServiceSubcategoryPage.jsx'
 
 export default function App() {
     return (
@@ -26,7 +28,12 @@ export default function App() {
             >
                 <Route path="/dashboard" element={<HomePage />} />
                 <Route path="/incidents" element={<PlaceholderPage title="Incidents" />} />
-                <Route path="/catalog" element={<PlaceholderPage title="Service Catalog" />} />
+                <Route path="/service-catalog" element={<ServiceCatalogPage />} />
+                <Route path="/service-catalog/:categorySlug" element={<ServiceSubcategoryPage />} />
+                <Route
+                    path="/service-catalog/:categorySlug/:subcategorySlug"
+                    element={<PlaceholderPage title="Request Form" />}
+                />
                 <Route path="/knowledge" element={<PlaceholderPage title="Knowledge" />} />
                 <Route path="/requests" element={<PlaceholderPage title="Requests" />} />
                 <Route path="/cmdb/ciclasses" element={<PlaceholderPage title="CI Classes" />} />

@@ -194,3 +194,15 @@ export function getPopupConfig(popupName, token) {
 
   return popupConfigRequests.get(popupName)
 }
+
+export function getServiceCategories(token) {
+  return apiGet('/api/svccategories', { token })
+}
+
+export function getServiceCategoryBySlug(categorySlug, token) {
+  return apiGet(`/api/svccategories/slug/${encodeURIComponent(categorySlug)}`, { token })
+}
+
+export function getServiceSubcategories(categorySlug, token) {
+  return apiGet(`/api/svcsubcategories?categorySlug=${encodeURIComponent(categorySlug)}`, { token })
+}
