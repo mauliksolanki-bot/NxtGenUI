@@ -13,6 +13,23 @@
     gap: 1rem 1.5rem;
 }
 
+.nxtgen-form-split {
+    border: none;
+    padding: 0;
+    background: transparent;
+}
+
+.nxtgen-form-split .nxtgen-form-grid {
+    border: 1px solid #d8dee6;
+    border-radius: 10px;
+    background: #fff;
+    padding: 1.25rem 1.5rem;
+}
+
+.nxtgen-form-split > .form-actions {
+    margin-top: 1rem;
+}
+
 .form-field {
     display: flex;
     flex-direction: column;

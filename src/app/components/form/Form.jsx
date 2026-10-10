@@ -27,6 +27,8 @@ export default function Form({
                                  onSubmit,
                                  submitLabel = 'Submit',
                                  clearLabel = 'Clear',
+                                 showClear = true,
+                                 actionsOutside = false,
                              }) {
     const [config, setConfig] = useState(null)
     const [values, setValues] = useState({})
@@ -318,8 +320,25 @@ export default function Form({
         return <p className="grid-status grid-status-error">{error}</p>
     }
 
+    const actionsBlock = (
+        <div className="form-actions">
+            <button type="submit" className="form-submit-button" disabled={isSubmitting}>
+                {isSubmitting ? 'Submitting...' : config?.submitLabel || submitLabel}
+            </button>
+            {showClear ? (
+                <button type="button" className="form-clear-button" onClick={handleClear} disabled={isSubmitting}>
+                    {clearLabel}
+                </button>
+            ) : null}
+        </div>
+    )
+
     return (
-        <form className="nxtgen-form-wrapper" onSubmit={handleSubmit} noValidate>
+        <form
+            className={actionsOutside ? 'nxtgen-form-wrapper nxtgen-form-split' : 'nxtgen-form-wrapper'}
+            onSubmit={handleSubmit}
+            noValidate
+        >
             {selectionError ? <p className="grid-status grid-status-error">{selectionError}</p> : null}
             <div className="nxtgen-form-grid">
                 {fields.map((field) => (
@@ -565,15 +584,9 @@ export default function Form({
                         ) : null}
                     </div>
                 ))}
-                <div className="form-actions">
-                    <button type="submit" className="form-submit-button" disabled={isSubmitting}>
-                        {isSubmitting ? 'Submitting...' : submitLabel}
-                    </button>
-                    <button type="button" className="form-clear-button" onClick={handleClear} disabled={isSubmitting}>
-                        {clearLabel}
-                    </button>
-                </div>
+                {actionsOutside ? null : actionsBlock}
             </div>
+            {actionsOutside ? actionsBlock : null}
         </form>
     )
 }

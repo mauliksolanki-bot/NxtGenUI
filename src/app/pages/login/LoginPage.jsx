@@ -45,6 +45,7 @@ export default function LoginPage() {
         username: response.username,
         displayName: response.displayName,
         supAdmin: response.supAdmin,
+        passwordResetRequired: response.passwordResetRequired,
         token: response.token,
         tokenType: response.tokenType,
         remember,

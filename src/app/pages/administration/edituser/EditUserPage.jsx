@@ -49,6 +49,8 @@ export default function EditUserPage() {
                             label: group.label,
                         })),
                         isSuperAdmin: details.isSuperAdmin ?? 'N',
+                        passwordResetRequired: details.passwordResetRequired ?? 'N',
+                        isActive: details.isActive ?? 'Y',
                     })
                 }
             } catch {
@@ -75,6 +77,8 @@ export default function EditUserPage() {
             roleIds: (values.roleId ?? []).map(Number),
             groupIds: (values.groupIds ?? []).map((item) => Number(item.value)),
             isSuperAdmin: values.isSuperAdmin,
+            passwordResetRequired: values.passwordResetRequired,
+            isActive: values.isActive,
         }
     }
 

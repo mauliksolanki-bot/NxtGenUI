@@ -77,6 +77,8 @@ export default function CreateUserPage() {
             roleIds: (values.roleId ?? []).map(Number),
             groupIds: (values.groupIds ?? []).map((item) => Number(item.value)),
             isSuperAdmin: values.isSuperAdmin,
+            passwordResetRequired: values.passwordResetRequired,
+            isActive: values.isActive,
         }
     }
 
