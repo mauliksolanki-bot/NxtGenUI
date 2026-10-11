@@ -4,6 +4,8 @@ import { clearGridCache, clearNavMenuCache, getMyProfile, getNavMenu, logout } f
 import Logo from '../components/Logo.jsx'
 import { clearSession, getAuthToken, getSession, setSession } from '../auth/session.js'
 import ForcePasswordResetPopup from '../components/popup/ForcePasswordResetPopup.jsx'
+import NotAuthorizedPage from '../pages/notauthorized/NotAuthorizedPage.jsx'
+import { isRouteAuthorized } from '../auth/routeAccess.js'
 import { useToast } from '../components/toast/ToastProvider.jsx'
 import { toSafeUserMessage } from '../utils/toSafeUserMessage.js'
 import './AppShell.css'
@@ -39,6 +41,12 @@ const NAV_ICONS = {
             <path d="M5 5h14v14H5z" />
         </svg>
     ),
+}
+
+function getInitials(name) {
+    const parts = String(name ?? '').trim().split(/\s+/).filter(Boolean)
+    const letters = parts.length > 1 ? parts[0][0] + parts[parts.length - 1][0] : (parts[0] ?? '?').slice(0, 2)
+    return letters.toUpperCase()
 }
 
 function containsActivePath(item, pathname) {
@@ -131,6 +139,7 @@ function NavMenuItem({ item, level = 0 }) {
 export default function AppShell() {
     const toast = useToast()
     const navigate = useNavigate()
+    const location = useLocation()
     const [navItems, setNavItems] = useState([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState('')
@@ -283,18 +292,25 @@ export default function AppShell() {
                                     <p className="user-profile-status">Loading...</p>
                                 ) : (
                                     <>
-                                        <div className="user-profile-section">
-                                            <span className="user-profile-label">Username</span>
-                                            <span className="user-profile-value">{profile.username}</span>
+                                        <div className="user-profile-header">
+                      <span className="user-profile-avatar" aria-hidden="true">
+                        {getInitials(getSession()?.displayName || profile.username)}
+                      </span>
+                                            <div className="user-profile-identity">
+                                                <span className="user-profile-name">{getSession()?.displayName || profile.username}</span>
+                                                <span className="user-profile-username">@{profile.username}</span>
+                                            </div>
                                         </div>
                                         <div className="user-profile-section">
                                             <span className="user-profile-label">Roles</span>
                                             {profile.roles.length ? (
-                                                <ul className="user-profile-list">
+                                                <div className="user-profile-badges">
                                                     {profile.roles.map((role) => (
-                                                        <li key={role}>{role}</li>
+                                                        <span className="user-profile-badge user-profile-badge-role" key={role}>
+                              {role}
+                            </span>
                                                     ))}
-                                                </ul>
+                                                </div>
                                             ) : (
                                                 <span className="user-profile-value">None assigned</span>
                                             )}
@@ -302,11 +318,13 @@ export default function AppShell() {
                                         <div className="user-profile-section">
                                             <span className="user-profile-label">Groups</span>
                                             {profile.groups.length ? (
-                                                <ul className="user-profile-list">
+                                                <div className="user-profile-badges">
                                                     {profile.groups.map((group) => (
-                                                        <li key={group}>{group}</li>
+                                                        <span className="user-profile-badge user-profile-badge-group" key={group}>
+                              {group}
+                            </span>
                                                     ))}
-                                                </ul>
+                                                </div>
                                             ) : (
                                                 <span className="user-profile-value">None assigned</span>
                                             )}
@@ -331,7 +349,7 @@ export default function AppShell() {
                     {navContent}
                 </nav>
                 <main className="app-main">
-                    <Outlet />
+                    {isLoading ? null : isRouteAuthorized(location.pathname, navItems) ? <Outlet /> : <NotAuthorizedPage />}
                 </main>
             </div>
             {mustResetPassword ? <ForcePasswordResetPopup onCompleted={handlePasswordResetCompleted} /> : null}

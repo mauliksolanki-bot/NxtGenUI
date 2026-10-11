@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Grid from '../../../components/grid/Grid.jsx'
 import ConfirmPopup from '../../../components/popup/ConfirmPopup.jsx'
-import { clearGridCache, deleteUser } from '../../../api/client.js'
+import { clearGridCache, deleteUser, unlockUser } from '../../../api/client.js'
 import { getAuthToken } from '../../../auth/session.js'
 import { useToast } from '../../../components/toast/ToastProvider.jsx'
 import { toSafeUserMessage } from '../../../utils/toSafeUserMessage.js'
@@ -15,7 +15,27 @@ export default function UsersPage() {
     const toast = useToast()
     const [userPendingDeletion, setUserPendingDeletion] = useState(null)
     const [isDeleting, setIsDeleting] = useState(false)
+    const [isUnlocking, setIsUnlocking] = useState(false)
     const [refreshToken, setRefreshToken] = useState(0)
+
+    async function handleUnlock(row) {
+        if (isUnlocking) {
+            return
+        }
+
+        setIsUnlocking(true)
+
+        try {
+            await unlockUser(row.id, getAuthToken())
+            clearGridCache(USERS_GRID_NAME)
+            setRefreshToken((value) => value + 1)
+            toast.success(toSafeUserMessage('User unlocked successfully.'))
+        } catch {
+            toast.error(toSafeUserMessage('Unable to unlock user right now.'))
+        } finally {
+            setIsUnlocking(false)
+        }
+    }
 
     function handleDeleteClick(row) {
         setUserPendingDeletion(row)
@@ -66,37 +86,47 @@ export default function UsersPage() {
             <Grid
                 gridName={USERS_GRID_NAME}
                 refreshToken={refreshToken}
-                renderActions={(row) => (
-                    <>
+                renderActions={(row) =>
+                    row.isLocked === true ? (
                         <button
                             type="button"
                             className="grid-action-button"
-                            title="Edit"
-                            aria-label="Edit"
-                            onClick={() => navigate(`/administration/edituser/${row.id}`)}
+                            title="Unlock"
+                            aria-label="Unlock"
+                            disabled={isUnlocking}
+                            onClick={() => handleUnlock(row)}
                         >
-                            <svg viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M4 20.5h4.5l10-10-4.5-4.5-10 10zm13.3-13.3 1.7-1.7a1 1 0 0 1 1.4 0l1.6 1.6a1 1 0 0 1 0 1.4l-1.7 1.7z" />
-                            </svg>
-                        </button>
-                        <button type="button" className="grid-action-button" title="Lock" aria-label="Lock">
                             <svg viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="M7 10V7a5 5 0 0 1 10 0v3h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1zm2 0h6V7a3 3 0 0 0-6 0z" />
                             </svg>
                         </button>
-                        <button
-                            type="button"
-                            className="grid-action-button grid-action-button-danger"
-                            title="Delete"
-                            aria-label="Delete"
-                            onClick={() => handleDeleteClick(row)}
-                        >
-                            <svg viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M9 3h6l1 2h4v2H4V5h4zM6 9h12l-1 12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2zm4 3v7h2v-7zm4 0v7h2v-7z" />
-                            </svg>
-                        </button>
-                    </>
-                )}
+                    ) : (
+                        <>
+                            <button
+                                type="button"
+                                className="grid-action-button"
+                                title="Edit"
+                                aria-label="Edit"
+                                onClick={() => navigate(`/administration/edituser/${row.id}`)}
+                            >
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M4 20.5h4.5l10-10-4.5-4.5-10 10zm13.3-13.3 1.7-1.7a1 1 0 0 1 1.4 0l1.6 1.6a1 1 0 0 1 0 1.4l-1.7 1.7z" />
+                                </svg>
+                            </button>
+                            <button
+                                type="button"
+                                className="grid-action-button grid-action-button-danger"
+                                title="Delete"
+                                aria-label="Delete"
+                                onClick={() => handleDeleteClick(row)}
+                            >
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M9 3h6l1 2h4v2H4V5h4zM6 9h12l-1 12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2zm4 3v7h2v-7zm4 0v7h2v-7z" />
+                                </svg>
+                            </button>
+                        </>
+                    )
+                }
             />
             {userPendingDeletion ? (
                 <ConfirmPopup

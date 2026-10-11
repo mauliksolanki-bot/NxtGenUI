@@ -6,6 +6,13 @@ const GENERIC_FALLBACK_MESSAGE = 'Something went wrong. Please try again.'
 // or sensitive information is ever surfaced in the UI.
 const SAFE_MESSAGES = new Set([
   'Invalid username or password.',
+  'Your account is not active. Please contact your administrator.',
+  'Your account has been locked after 3 failed login attempts. Please contact your administrator.',
+  'User unlocked successfully.',
+  'Unable to unlock user right now.',
+  'Password changed successfully.',
+  'Unable to change password right now.',
+  'Unable to load user information right now.',
   'Enter your username and password to continue.',
   'Navigation menu is unavailable right now.',
   'You have been logged out successfully.',

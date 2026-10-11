@@ -145,6 +145,10 @@ export function deleteUser(id, token) {
     return apiPost(`/api/deleteuser?id=${encodeURIComponent(id)}`, {}, { token })
 }
 
+export function unlockUser(id, token) {
+    return apiPost(`/api/unlockuser?id=${encodeURIComponent(id)}`, {}, { token })
+}
+
 export function getUserById(id, token) {
     return apiGet(`/api/getuserbyid?id=${encodeURIComponent(id)}`, { token })
 }
