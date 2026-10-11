@@ -218,3 +218,69 @@ export function getServiceCategoryBySlug(categorySlug, token) {
 export function getServiceSubcategories(categorySlug, token) {
     return apiGet(`/api/svcsubcategories?categorySlug=${encodeURIComponent(categorySlug)}`, { token })
 }
+
+function authOptions(token) {
+    return { token }
+}
+
+export function searchRequestedForUsers(query, token) {
+    return apiGet(`/api/sr/users/search?query=${encodeURIComponent(query)}`, authOptions(token))
+}
+
+export function getNewServiceRequest(categorySlug, subcategorySlug, token) {
+    const query = `categorySlug=${encodeURIComponent(categorySlug)}&subcategorySlug=${encodeURIComponent(subcategorySlug)}`
+    return apiGet(`/api/sr/new?${query}`, authOptions(token))
+}
+
+export function getServiceRequest(srId, token) {
+    return apiGet(`/api/sr/${encodeURIComponent(srId)}`, authOptions(token))
+}
+
+export function updateServiceRequest(srId, payload, token) {
+    return apiPost(`/api/sr/${encodeURIComponent(srId)}/update`, payload, authOptions(token))
+}
+
+export function submitServiceRequest(payload, token) {
+    return apiPost('/api/sr/submit', payload, authOptions(token))
+}
+
+export function deleteServiceRequest(srId, token) {
+    return apiPost(`/api/sr/${encodeURIComponent(srId)}/delete`, {}, authOptions(token))
+}
+
+export function getServiceRequestAttachments(srId, token) {
+    return apiGet(`/api/sr/${encodeURIComponent(srId)}/attachments`, authOptions(token))
+}
+
+export async function uploadServiceRequestAttachment(srId, file, token) {
+    const formData = new FormData()
+    formData.append('file', file)
+    const response = await fetch(`${API_BASE_URL}/api/sr/${encodeURIComponent(srId)}/attachments`, {
+        method: 'POST',
+        headers: buildAuthHeader(token),
+        body: formData,
+    })
+
+    if (!response.ok) {
+        throw buildHttpError(await parseErrorBody(response), response.status)
+    }
+
+    return response.json()
+}
+
+export function deleteServiceRequestAttachments(srId, ids, token) {
+    return apiPost(`/api/sr/${encodeURIComponent(srId)}/attachments/delete`, { ids }, authOptions(token))
+}
+
+export async function downloadServiceRequestAttachment(srId, attachmentId, token) {
+    const response = await fetch(
+        `${API_BASE_URL}/api/sr/${encodeURIComponent(srId)}/attachments/${encodeURIComponent(attachmentId)}/file`,
+        { headers: buildAuthHeader(token), cache: 'no-store' },
+    )
+
+    if (!response.ok) {
+        throw buildHttpError(await parseErrorBody(response), response.status)
+    }
+
+    return response.blob()
+}

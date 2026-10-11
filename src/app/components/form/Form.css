@@ -283,3 +283,38 @@
         grid-template-columns: 1fr;
     }
 }
+
+.nxtgen-form-fieldset {
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+}
+
+.form-field-full {
+    grid-column: 1 / -1;
+}
+
+.form-field-textarea {
+    resize: vertical;
+    font-family: inherit;
+    min-height: 70px;
+}
+
+.form-field-input[type='date'],
+.form-field-input[type='number'] {
+    box-sizing: border-box;
+}
+
+.form-field-input[readonly],
+.form-field-textarea[readonly] {
+    cursor: default;
+}
+
+.nxtgen-form-fieldset:disabled .form-field-input,
+.nxtgen-form-fieldset:disabled .form-field-select {
+    background: #f4f5f7;
+    color: #6b7686;
+}

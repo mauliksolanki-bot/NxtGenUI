@@ -14,6 +14,7 @@ import CreateGroupPage from './pages/administration/creategroup/CreateGroupPage.
 import EditGroupPage from './pages/administration/editgroup/EditGroupPage.jsx'
 import ServiceCatalogPage from './pages/catalog/ServiceCatalogPage.jsx'
 import ServiceSubcategoryPage from './pages/catalog/ServiceSubcategoryPage.jsx'
+import ServiceRequestPage from './pages/servicerequest/ServiceRequestPage.jsx'
 
 export default function App() {
     return (
@@ -32,7 +33,11 @@ export default function App() {
                 <Route path="/service-catalog/:categorySlug" element={<ServiceSubcategoryPage />} />
                 <Route
                     path="/service-catalog/:categorySlug/:subcategorySlug"
-                    element={<PlaceholderPage title="Request Form" />}
+                    element={<ServiceRequestPage />}
+                />
+                <Route
+                    path="/service-catalog/:categorySlug/:subcategorySlug/:srId"
+                    element={<ServiceRequestPage />}
                 />
                 <Route path="/knowledge" element={<PlaceholderPage title="Knowledge" />} />
                 <Route path="/requests" element={<PlaceholderPage title="Requests" />} />

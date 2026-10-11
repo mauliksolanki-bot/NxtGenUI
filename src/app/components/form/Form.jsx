@@ -29,6 +29,9 @@ export default function Form({
                                  clearLabel = 'Clear',
                                  showClear = true,
                                  actionsOutside = false,
+                                 hideActions = false,
+                                 locked = false,
+                                 apiRef,
                              }) {
     const [config, setConfig] = useState(null)
     const [values, setValues] = useState({})
@@ -312,6 +315,13 @@ export default function Form({
         }
     }
 
+    if (apiRef) {
+        apiRef.current = {
+            getValues: () => values,
+            setErrors: (errors) => setFieldErrors(errors ?? {}),
+        }
+    }
+
     if (isLoading) {
         return <p className="grid-status">Loading form...</p>
     }
@@ -340,253 +350,274 @@ export default function Form({
             noValidate
         >
             {selectionError ? <p className="grid-status grid-status-error">{selectionError}</p> : null}
-            <div className="nxtgen-form-grid">
-                {fields.map((field) => (
-                    <div className="form-field" key={field.id}>
-                        <label className="form-field-label" htmlFor={field.dataField}>
-                            {field.fieldLabel}
-                            {field.mandatory ? <span className="form-field-mandatory">*</span> : null}
-                        </label>
-                        {field.fieldType === 'DROPDOWN' ? (
-                            <select
-                                id={field.dataField}
-                                className="form-field-select"
-                                value={values[field.dataField] ?? ''}
-                                onChange={(event) => handleChange(field.dataField, event.target.value)}
-                                disabled={field.readOnly}
-                            >
-                                <option value="" disabled>
-                                    {field.placeholder || 'Select an option'}
-                                </option>
-                                {(field.options ?? []).map((option) => (
-                                    <option key={option.value} value={option.value}>
-                                        {option.label}
-                                    </option>
-                                ))}
-                            </select>
-                        ) : field.fieldType === 'MULTISELECT' ? (
-                            <div
-                                className="form-field-multiselect"
-                                ref={openMultiSelectField === field.dataField ? multiSelectRef : null}
-                            >
-                                <div
+            <fieldset className="nxtgen-form-fieldset" disabled={locked}>
+                <div className="nxtgen-form-grid">
+                    {fields.map((field) => (
+                        <div className={field.fullWidth ? 'form-field form-field-full' : 'form-field'} key={field.id}>
+                            <label className="form-field-label" htmlFor={field.dataField}>
+                                {field.fieldLabel}
+                                {field.mandatory ? <span className="form-field-mandatory">*</span> : null}
+                            </label>
+                            {field.fieldType === 'DROPDOWN' ? (
+                                <select
                                     id={field.dataField}
-                                    className="form-field-search-multi-box form-field-multiselect-trigger"
-                                    role="button"
-                                    tabIndex={field.readOnly ? -1 : 0}
-                                    onClick={() => {
-                                        if (field.readOnly) {
-                                            return
-                                        }
-                                        setOpenMultiSelectField((current) => (current === field.dataField ? null : field.dataField))
-                                    }}
+                                    className="form-field-select"
+                                    value={values[field.dataField] ?? ''}
+                                    onChange={(event) => handleChange(field.dataField, event.target.value)}
+                                    disabled={field.readOnly}
                                 >
-                                    {(field.options ?? [])
-                                        .filter((option) => (values[field.dataField] ?? []).includes(option.value))
-                                        .map((option) => (
-                                            <span className="form-field-chip" key={option.value}>
+                                    <option value="" disabled>
+                                        {field.placeholder || 'Select an option'}
+                                    </option>
+                                    {(field.options ?? []).map((option) => (
+                                        <option key={option.value} value={option.value}>
+                                            {option.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            ) : field.fieldType === 'MULTISELECT' ? (
+                                <div
+                                    className="form-field-multiselect"
+                                    ref={openMultiSelectField === field.dataField ? multiSelectRef : null}
+                                >
+                                    <div
+                                        id={field.dataField}
+                                        className="form-field-search-multi-box form-field-multiselect-trigger"
+                                        role="button"
+                                        tabIndex={field.readOnly ? -1 : 0}
+                                        onClick={() => {
+                                            if (field.readOnly) {
+                                                return
+                                            }
+                                            setOpenMultiSelectField((current) => (current === field.dataField ? null : field.dataField))
+                                        }}
+                                    >
+                                        {(field.options ?? [])
+                                            .filter((option) => (values[field.dataField] ?? []).includes(option.value))
+                                            .map((option) => (
+                                                <span className="form-field-chip" key={option.value}>
                         {option.label}
-                                                {field.readOnly ? null : (
-                                                    <button
-                                                        type="button"
-                                                        className="form-field-chip-remove"
-                                                        onClick={(event) => {
-                                                            event.stopPropagation()
-                                                            handleMultiSelectToggle(field.dataField, option.value)
-                                                        }}
-                                                        aria-label={`Remove ${option.label}`}
-                                                    >
-                                                        ×
-                                                    </button>
-                                                )}
+                                                    {field.readOnly ? null : (
+                                                        <button
+                                                            type="button"
+                                                            className="form-field-chip-remove"
+                                                            onClick={(event) => {
+                                                                event.stopPropagation()
+                                                                handleMultiSelectToggle(field.dataField, option.value)
+                                                            }}
+                                                            aria-label={`Remove ${option.label}`}
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    )}
                       </span>
-                                        ))}
-                                    {(values[field.dataField] ?? []).length === 0 ? (
-                                        <span className="form-field-multiselect-placeholder">
+                                            ))}
+                                        {(values[field.dataField] ?? []).length === 0 ? (
+                                            <span className="form-field-multiselect-placeholder">
                       {field.placeholder || 'Select an option'}
                     </span>
+                                        ) : null}
+                                    </div>
+                                    {openMultiSelectField === field.dataField ? (
+                                        <ul className="form-field-multiselect-options">
+                                            {(field.options ?? []).map((option) => (
+                                                <li key={option.value}>
+                                                    <label className="form-field-multiselect-option">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={(values[field.dataField] ?? []).includes(option.value)}
+                                                            onChange={() => handleMultiSelectToggle(field.dataField, option.value)}
+                                                        />
+                                                        {option.label}
+                                                    </label>
+                                                </li>
+                                            ))}
+                                        </ul>
                                     ) : null}
                                 </div>
-                                {openMultiSelectField === field.dataField ? (
-                                    <ul className="form-field-multiselect-options">
-                                        {(field.options ?? []).map((option) => (
-                                            <li key={option.value}>
-                                                <label className="form-field-multiselect-option">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={(values[field.dataField] ?? []).includes(option.value)}
-                                                        onChange={() => handleMultiSelectToggle(field.dataField, option.value)}
-                                                    />
-                                                    {option.label}
-                                                </label>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : null}
-                            </div>
-                        ) : field.fieldType === 'SEARCHMULTISELECT' ? (
-                            <div className="form-field-search">
-                                <div className="form-field-search-multi-box">
-                                    {(values[field.dataField] ?? []).map((item) => (
-                                        <span className="form-field-chip" key={item.value}>
-                      {item.label}
-                                            {field.readOnly ? null : (
-                                                <button
-                                                    type="button"
-                                                    className="form-field-chip-remove"
-                                                    onClick={() => handleSearchMultiRemove(field.dataField, item.value)}
-                                                    aria-label={`Remove ${item.label}`}
-                                                >
-                                                    ×
-                                                </button>
-                                            )}
-                    </span>
-                                    ))}
-                                    <input
-                                        id={field.dataField}
-                                        name={`${field.dataField}-search`}
-                                        className="form-field-search-multi-input"
-                                        type="text"
-                                        autoComplete="off"
-                                        autoCorrect="off"
-                                        autoCapitalize="off"
-                                        spellCheck="false"
-                                        placeholder={(values[field.dataField] ?? []).length > 0 ? '' : field.placeholder || ''}
-                                        readOnly={field.readOnly}
-                                        value={searchMultiQueries[field.dataField] ?? ''}
-                                        onChange={(event) =>
-                                            handleSearchMultiQueryChange(field.dataField, event.target.value, searchHandlers[field.dataField])
-                                        }
-                                        onFocus={() => {
-                                            if ((searchResults[field.dataField] ?? []).length > 0) {
-                                                setOpenSearchField(field.dataField)
-                                            }
-                                        }}
-                                        onBlur={() => {
-                                            window.setTimeout(() => setOpenSearchField(null), 150)
-                                        }}
-                                    />
-                                </div>
-                                {openSearchField === field.dataField && (searchResults[field.dataField] ?? []).length > 0 ? (
-                                    <ul className="form-field-search-results">
-                                        {searchResults[field.dataField].map((option) => (
-                                            <li key={option.value}>
-                                                <button
-                                                    type="button"
-                                                    className="form-field-search-result"
-                                                    onMouseDown={(event) => event.preventDefault()}
-                                                    onClick={() => handleSearchMultiSelect(field.dataField, option)}
-                                                >
-                                                    {option.label}
-                                                </button>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : null}
-                            </div>
-                        ) : field.fieldType === 'SEARCH' ? (
-                            <div className="form-field-search">
-                                {field.dataField === 'userId' ? (
-                                    <input
-                                        id={field.dataField}
-                                        name={`${field.dataField}-search`}
-                                        className="form-field-input"
-                                        type="text"
-                                        autoComplete="off"
-                                        autoCorrect="off"
-                                        autoCapitalize="off"
-                                        spellCheck="false"
-                                        placeholder={field.placeholder || ''}
-                                        readOnly={field.readOnly}
-                                        value={values[field.dataField] ?? ''}
-                                        onChange={(event) => handleChange(field.dataField, event.target.value)}
-                                        onFocus={() => {
-                                            if ((searchResults[field.dataField] ?? []).length > 0) {
-                                                setOpenSearchField(field.dataField)
-                                            }
-                                        }}
-                                        onBlur={() => {
-                                            window.setTimeout(() => setOpenSearchField(null), 150)
-                                        }}
-                                    />
-                                ) : (
+                            ) : field.fieldType === 'SEARCHMULTISELECT' ? (
+                                <div className="form-field-search">
                                     <div className="form-field-search-multi-box">
-                                        {confirmedSearchFields[field.dataField] && values[field.dataField] ? (
-                                            <span className="form-field-chip">
-                        {values[field.dataField]}
+                                        {(values[field.dataField] ?? []).map((item) => (
+                                            <span className="form-field-chip" key={item.value}>
+                      {item.label}
                                                 {field.readOnly ? null : (
                                                     <button
                                                         type="button"
                                                         className="form-field-chip-remove"
-                                                        onClick={() => handleChange(field.dataField, '')}
-                                                        aria-label={`Remove ${values[field.dataField]}`}
+                                                        onClick={() => handleSearchMultiRemove(field.dataField, item.value)}
+                                                        aria-label={`Remove ${item.label}`}
                                                     >
                                                         ×
                                                     </button>
                                                 )}
-                      </span>
-                                        ) : (
-                                            <input
-                                                id={field.dataField}
-                                                name={`${field.dataField}-search`}
-                                                className="form-field-search-multi-input"
-                                                type="text"
-                                                autoComplete="off"
-                                                autoCorrect="off"
-                                                autoCapitalize="off"
-                                                spellCheck="false"
-                                                placeholder={field.placeholder || ''}
-                                                readOnly={field.readOnly}
-                                                value={values[field.dataField] ?? ''}
-                                                onChange={(event) => handleChange(field.dataField, event.target.value)}
-                                                onFocus={() => {
-                                                    if ((searchResults[field.dataField] ?? []).length > 0) {
-                                                        setOpenSearchField(field.dataField)
-                                                    }
-                                                }}
-                                                onBlur={() => {
-                                                    window.setTimeout(() => setOpenSearchField(null), 150)
-                                                }}
-                                            />
-                                        )}
-                                    </div>
-                                )}
-                                {openSearchField === field.dataField && (searchResults[field.dataField] ?? []).length > 0 ? (
-                                    <ul className="form-field-search-results">
-                                        {searchResults[field.dataField].map((option) => (
-                                            <li key={option.value}>
-                                                <button
-                                                    type="button"
-                                                    className="form-field-search-result"
-                                                    onMouseDown={(event) => event.preventDefault()}
-                                                    onClick={() => handleSearchSelect(field.dataField, option)}
-                                                >
-                                                    {option.label}
-                                                </button>
-                                            </li>
+                    </span>
                                         ))}
-                                    </ul>
-                                ) : null}
-                            </div>
-                        ) : (
-                            <input
-                                id={field.dataField}
-                                className="form-field-input"
-                                type={field.fieldType === 'PASSWORD' ? 'password' : 'text'}
-                                placeholder={field.placeholder || ''}
-                                readOnly={field.readOnly}
-                                value={values[field.dataField] ?? ''}
-                                onChange={(event) => handleChange(field.dataField, event.target.value)}
-                            />
-                        )}
-                        {fieldErrors[field.dataField] ? (
-                            <span className="form-field-error">{fieldErrors[field.dataField]}</span>
-                        ) : null}
-                    </div>
-                ))}
-                {actionsOutside ? null : actionsBlock}
-            </div>
-            {actionsOutside ? actionsBlock : null}
+                                        <input
+                                            id={field.dataField}
+                                            name={`${field.dataField}-search`}
+                                            className="form-field-search-multi-input"
+                                            type="text"
+                                            autoComplete="off"
+                                            autoCorrect="off"
+                                            autoCapitalize="off"
+                                            spellCheck="false"
+                                            placeholder={(values[field.dataField] ?? []).length > 0 ? '' : field.placeholder || ''}
+                                            readOnly={field.readOnly}
+                                            value={searchMultiQueries[field.dataField] ?? ''}
+                                            onChange={(event) =>
+                                                handleSearchMultiQueryChange(field.dataField, event.target.value, searchHandlers[field.dataField])
+                                            }
+                                            onFocus={() => {
+                                                if ((searchResults[field.dataField] ?? []).length > 0) {
+                                                    setOpenSearchField(field.dataField)
+                                                }
+                                            }}
+                                            onBlur={() => {
+                                                window.setTimeout(() => setOpenSearchField(null), 150)
+                                            }}
+                                        />
+                                    </div>
+                                    {openSearchField === field.dataField && (searchResults[field.dataField] ?? []).length > 0 ? (
+                                        <ul className="form-field-search-results">
+                                            {searchResults[field.dataField].map((option) => (
+                                                <li key={option.value}>
+                                                    <button
+                                                        type="button"
+                                                        className="form-field-search-result"
+                                                        onMouseDown={(event) => event.preventDefault()}
+                                                        onClick={() => handleSearchMultiSelect(field.dataField, option)}
+                                                    >
+                                                        {option.label}
+                                                    </button>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : null}
+                                </div>
+                            ) : field.fieldType === 'SEARCH' ? (
+                                <div className="form-field-search">
+                                    {field.dataField === 'userId' ? (
+                                        <input
+                                            id={field.dataField}
+                                            name={`${field.dataField}-search`}
+                                            className="form-field-input"
+                                            type="text"
+                                            autoComplete="off"
+                                            autoCorrect="off"
+                                            autoCapitalize="off"
+                                            spellCheck="false"
+                                            placeholder={field.placeholder || ''}
+                                            readOnly={field.readOnly}
+                                            value={values[field.dataField] ?? ''}
+                                            onChange={(event) => handleChange(field.dataField, event.target.value)}
+                                            onFocus={() => {
+                                                if ((searchResults[field.dataField] ?? []).length > 0) {
+                                                    setOpenSearchField(field.dataField)
+                                                }
+                                            }}
+                                            onBlur={() => {
+                                                window.setTimeout(() => setOpenSearchField(null), 150)
+                                            }}
+                                        />
+                                    ) : (
+                                        <div className="form-field-search-multi-box">
+                                            {confirmedSearchFields[field.dataField] && values[field.dataField] ? (
+                                                <span className="form-field-chip">
+                        {values[field.dataField]}
+                                                    {field.readOnly ? null : (
+                                                        <button
+                                                            type="button"
+                                                            className="form-field-chip-remove"
+                                                            onClick={() => handleChange(field.dataField, '')}
+                                                            aria-label={`Remove ${values[field.dataField]}`}
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    )}
+                      </span>
+                                            ) : (
+                                                <input
+                                                    id={field.dataField}
+                                                    name={`${field.dataField}-search`}
+                                                    className="form-field-search-multi-input"
+                                                    type="text"
+                                                    autoComplete="off"
+                                                    autoCorrect="off"
+                                                    autoCapitalize="off"
+                                                    spellCheck="false"
+                                                    placeholder={field.placeholder || ''}
+                                                    readOnly={field.readOnly}
+                                                    value={values[field.dataField] ?? ''}
+                                                    onChange={(event) => handleChange(field.dataField, event.target.value)}
+                                                    onFocus={() => {
+                                                        if ((searchResults[field.dataField] ?? []).length > 0) {
+                                                            setOpenSearchField(field.dataField)
+                                                        }
+                                                    }}
+                                                    onBlur={() => {
+                                                        window.setTimeout(() => setOpenSearchField(null), 150)
+                                                    }}
+                                                />
+                                            )}
+                                        </div>
+                                    )}
+                                    {openSearchField === field.dataField && (searchResults[field.dataField] ?? []).length > 0 ? (
+                                        <ul className="form-field-search-results">
+                                            {searchResults[field.dataField].map((option) => (
+                                                <li key={option.value}>
+                                                    <button
+                                                        type="button"
+                                                        className="form-field-search-result"
+                                                        onMouseDown={(event) => event.preventDefault()}
+                                                        onClick={() => handleSearchSelect(field.dataField, option)}
+                                                    >
+                                                        {option.label}
+                                                    </button>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : null}
+                                </div>
+                            ) : field.fieldType === 'TEXTAREA' ? (
+                                <textarea
+                                    id={field.dataField}
+                                    className="form-field-input form-field-textarea"
+                                    rows={field.fullWidth ? 5 : 3}
+                                    placeholder={field.placeholder || ''}
+                                    readOnly={field.readOnly}
+                                    value={values[field.dataField] ?? ''}
+                                    onChange={(event) => handleChange(field.dataField, event.target.value)}
+                                />
+                            ) : (
+                                <input
+                                    id={field.dataField}
+                                    className="form-field-input"
+                                    type={
+                                        field.fieldType === 'PASSWORD'
+                                            ? 'password'
+                                            : field.fieldType === 'DATE'
+                                                ? 'date'
+                                                : field.fieldType === 'NUMBER'
+                                                    ? 'number'
+                                                    : 'text'
+                                    }
+                                    min={field.fieldType === 'NUMBER' ? 1 : undefined}
+                                    placeholder={field.placeholder || ''}
+                                    readOnly={field.readOnly}
+                                    value={values[field.dataField] ?? ''}
+                                    onChange={(event) => handleChange(field.dataField, event.target.value)}
+                                />
+                            )}
+                            {fieldErrors[field.dataField] ? (
+                                <span className="form-field-error">{fieldErrors[field.dataField]}</span>
+                            ) : null}
+                        </div>
+                    ))}
+                    {actionsOutside || hideActions ? null : actionsBlock}
+                </div>
+            </fieldset>
+            {actionsOutside && !hideActions ? actionsBlock : null}
         </form>
     )
 }
