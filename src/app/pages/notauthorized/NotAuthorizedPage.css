@@ -1,0 +1,44 @@
+.not-authorized {
+  max-width: 480px;
+  min-height: 60vh;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.not-authorized-icon svg {
+  width: 56px;
+  height: 56px;
+  fill: #b3261e;
+}
+
+.not-authorized-title {
+  margin: 0.75rem 0 0.5rem;
+  color: #1a466b;
+  font-size: 1.5rem;
+}
+
+.not-authorized-message {
+  margin: 0 0 1.5rem;
+  color: #243447;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.not-authorized-link {
+  display: inline-block;
+  padding: 0.55rem 1.4rem;
+  border-radius: 8px;
+  background: #1a466b;
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.not-authorized-link:hover {
+  background: #143854;
+}

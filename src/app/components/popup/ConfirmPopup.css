@@ -72,3 +72,7 @@
 .confirm-popup-no:hover {
     background: #f4f5f7;
 }
+
+.force-reset-popup .nxtgen-form-grid {
+    grid-template-columns: 1fr;
+}
