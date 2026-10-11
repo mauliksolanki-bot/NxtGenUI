@@ -6,6 +6,83 @@ import './Form.css'
 
 const SEARCH_DEBOUNCE_MS = 300
 
+const LOOKUP_FIELDS = new Set(['openedBy', 'reqId', 'requestType', 'ciItem', 'requestedFor'])
+
+function getRecordAccessories(field) {
+    if (field.fieldType === 'DATE' || field.dataField === 'openedAt') {
+        return { calendar: true }
+    }
+    if (field.fieldType === 'SEARCH' || LOOKUP_FIELDS.has(field.dataField)) {
+        return { lookup: true, info: true }
+    }
+    return {}
+}
+
+function FormChromeIcon({ type }) {
+    if (type === 'lookup') {
+        return (
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79L20 21.5 21.5 20zM9.5 14C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+            </svg>
+        )
+    }
+    if (type === 'info') {
+        return (
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-6h2zm0-8h-2V7h2z" />
+            </svg>
+        )
+    }
+    return (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7 11h2V3h6v8h2l-5 6zm12 8H5v2h14z" />
+        </svg>
+    )
+}
+
+function wrapRecordControl(field, node, value) {
+    const accessories = getRecordAccessories(field)
+    if (!accessories.lookup && !accessories.info && !accessories.calendar) {
+        return node
+    }
+
+    function focusField() {
+        document.getElementById(field.dataField)?.focus()
+    }
+
+    function openPicker() {
+        const input = document.getElementById(field.dataField)
+        input?.showPicker?.()
+        input?.focus()
+    }
+
+    return (
+        <div className="form-field-control">
+            {node}
+            {accessories.lookup ? (
+                <button type="button" className="form-chrome-btn" aria-label={`Lookup ${field.fieldLabel}`} onClick={focusField}>
+                    <FormChromeIcon type="lookup" />
+                </button>
+            ) : null}
+            {accessories.info ? (
+                <button
+                    type="button"
+                    className="form-chrome-btn"
+                    aria-label={`${field.fieldLabel} details`}
+                    title={value ? String(value) : field.fieldLabel}
+                >
+                    <FormChromeIcon type="info" />
+                </button>
+            ) : null}
+            {accessories.calendar ? (
+                <button type="button" className="form-chrome-btn" aria-label={`Choose ${field.fieldLabel}`} onClick={openPicker}>
+                    <FormChromeIcon type="calendar" />
+                </button>
+            ) : null}
+        </div>
+    )
+}
+
 function buildInitialValues(fields, overrides = {}) {
     return fields.reduce((acc, field) => {
         const overrideValue = overrides[field.dataField]
@@ -31,6 +108,7 @@ export default function Form({
                                  actionsOutside = false,
                                  hideActions = false,
                                  locked = false,
+                                 variant = 'default',
                                  apiRef,
                              }) {
     const [config, setConfig] = useState(null)
@@ -330,6 +408,15 @@ export default function Form({
         return <p className="grid-status grid-status-error">{error}</p>
     }
 
+    const isRecord = variant === 'record'
+    const formClassName = [
+        'nxtgen-form-wrapper',
+        actionsOutside ? 'nxtgen-form-split' : '',
+        isRecord ? 'nxtgen-form-record' : '',
+    ]
+        .filter(Boolean)
+        .join(' ')
+
     const actionsBlock = (
         <div className="form-actions">
             <button type="submit" className="form-submit-button" disabled={isSubmitting}>
@@ -345,7 +432,7 @@ export default function Form({
 
     return (
         <form
-            className={actionsOutside ? 'nxtgen-form-wrapper nxtgen-form-split' : 'nxtgen-form-wrapper'}
+            className={formClassName}
             onSubmit={handleSubmit}
             noValidate
         >
@@ -353,12 +440,24 @@ export default function Form({
             <fieldset className="nxtgen-form-fieldset" disabled={locked}>
                 <div className="nxtgen-form-grid">
                     {fields.map((field) => (
-                        <div className={field.fullWidth ? 'form-field form-field-full' : 'form-field'} key={field.id}>
+                        <div
+                            className={[
+                                'form-field',
+                                field.fullWidth ? 'form-field-full' : '',
+                                field.dataField === 'stage' ? 'form-field-stage' : '',
+                                field.dataField === 'workNotes' ? 'form-field-worknotes' : '',
+                            ]
+                                .filter(Boolean)
+                                .join(' ')}
+                            key={field.id}
+                        >
                             <label className="form-field-label" htmlFor={field.dataField}>
                                 {field.fieldLabel}
                                 {field.mandatory ? <span className="form-field-mandatory">*</span> : null}
                             </label>
-                            {field.fieldType === 'DROPDOWN' ? (
+                            {wrapRecordControl(
+                                isRecord ? field : { ...field, fieldType: '', dataField: '' },
+                                field.fieldType === 'DROPDOWN' ? (
                                 <select
                                     id={field.dataField}
                                     className="form-field-select"
@@ -497,7 +596,7 @@ export default function Form({
                                 </div>
                             ) : field.fieldType === 'SEARCH' ? (
                                 <div className="form-field-search">
-                                    {field.dataField === 'userId' ? (
+                                    {isRecord || field.dataField === 'userId' ? (
                                         <input
                                             id={field.dataField}
                                             name={`${field.dataField}-search`}
@@ -608,6 +707,8 @@ export default function Form({
                                     value={values[field.dataField] ?? ''}
                                     onChange={(event) => handleChange(field.dataField, event.target.value)}
                                 />
+                            ),
+                                values[field.dataField]
                             )}
                             {fieldErrors[field.dataField] ? (
                                 <span className="form-field-error">{fieldErrors[field.dataField]}</span>

@@ -7,6 +7,7 @@ import {
     deleteServiceRequest,
     getNewServiceRequest,
     getServiceRequest,
+    getServiceRequestAttachments,
     uploadServiceRequestAttachment,
     searchRequestedForUsers,
     submitServiceRequest,
@@ -68,6 +69,7 @@ export default function ServiceRequestPage() {
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
     const formApi = useRef(null)
     const [pendingFiles, setPendingFiles] = useState([])
+    const [attachments, setAttachments] = useState([])
 
     const listPath = `/service-catalog/${categorySlug}`
     const basePath = `/service-catalog/${categorySlug}/${subcategorySlug}`
@@ -81,6 +83,7 @@ export default function ServiceRequestPage() {
         setServiceRequest(null)
         setPendingFiles([])
 
+        setAttachments([])
         getNewServiceRequest(categorySlug, subcategorySlug, getAuthToken())
             .then((result) => {
                 if (isMounted) {
@@ -122,6 +125,30 @@ export default function ServiceRequestPage() {
             isMounted = false
         }
     }, [srId, reloadKey])
+
+    useEffect(() => {
+        if (!srId) {
+            return undefined
+        }
+
+        let isMounted = true
+
+        getServiceRequestAttachments(srId, getAuthToken())
+            .then((result) => {
+                if (isMounted) {
+                    setAttachments(result)
+                }
+            })
+            .catch(() => {
+                if (isMounted) {
+                    setAttachments([])
+                }
+            })
+
+        return () => {
+            isMounted = false
+        }
+    }, [srId, reloadKey, showAttachments])
 
     async function runAction(action, successMessage, failureMessage) {
         if (isBusy || !serviceRequest) {
@@ -196,16 +223,24 @@ export default function ServiceRequestPage() {
 
     const editable = Boolean(serviceRequest?.editable)
     const isNew = !srId
+    const visibleAttachments = isNew ? pendingFiles.map((file) => ({ id: file.name, fileName: file.name })) : attachments
+    const recordNumber = serviceRequest?.srId || 'New'
 
     return (
         <section className="sr-page">
-            <div className="page-header-row">
-                <h1>{serviceRequest?.subcategory ? `Request From: ${serviceRequest.subcategory}` : 'Request Form'}</h1>
+            <div className="sr-record-header">
+                <button type="button" className="sr-back-btn" aria-label="Back" onClick={() => navigate(listPath)}>
+                    ‹
+                </button>
+                <div className="sr-record-title">
+                    <span className="sr-record-type">Requested Item</span>
+                    <strong>{recordNumber}</strong>
+                </div>
                 {serviceRequest ? (
                     <div className="sr-toolbar">
                         <button
                             type="button"
-                            className="create-user-button sr-icon-only"
+                            className="sr-header-btn sr-icon-only"
                             aria-label="Attachments"
                             title="Attachments"
                             onClick={() => setShowAttachments(true)}
@@ -216,37 +251,28 @@ export default function ServiceRequestPage() {
                         </button>
                         <button
                             type="button"
-                            className="create-user-button"
+                            className="sr-header-btn"
                             disabled={isBusy || !editable || isNew}
                             onClick={() =>
                                 runAction(updateServiceRequest, 'Service request updated successfully.', 'Unable to update service request right now.')
                             }
                         >
-                            <svg viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7zm-5 16a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm3-10H6V5h9z" />
-                            </svg>
                             Update
                         </button>
                         <button
                             type="button"
-                            className="create-user-button"
+                            className="sr-header-btn"
                             disabled={isBusy || isNew}
                             onClick={() => setShowDeleteConfirm(true)}
                         >
-                            <svg viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M9 3h6l1 2h4v2H4V5h4zM6 9h12l-1 12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2zm4 3v7h2v-7zm4 0v7h2v-7z" />
-                            </svg>
                             Delete
                         </button>
                         <button
                             type="button"
-                            className="create-user-button"
+                            className="sr-header-btn sr-header-btn-primary"
                             disabled={isBusy || !editable || !isNew}
                             onClick={handleSubmit}
                         >
-                            <svg viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M2 21l21-9L2 3v7l15 2-15 2z" />
-                            </svg>
                             Submit
                         </button>
                     </div>
@@ -255,6 +281,21 @@ export default function ServiceRequestPage() {
 
             {serviceRequest ? (
                 <>
+                    <div className="sr-attachments-line">
+                        <button type="button" className="sr-attachments-link" onClick={() => setShowAttachments(true)}>
+                            Manage Attachments
+                        </button>
+                        <span>({visibleAttachments.length}):</span>
+                        {visibleAttachments.length === 0 ? (
+                            <span className="sr-attachments-none">None</span>
+                        ) : (
+                            visibleAttachments.map((attachment) => (
+                                <span className="sr-attachment-chip" key={attachment.id}>
+                                    {attachment.fileName}
+                                </span>
+                            ))
+                        )}
+                    </div>
                     <Form
                         key={`${serviceRequest.srId}-${reloadKey}`}
                         formName={serviceRequest.formName || 'CREATE_SR_FORM'}
@@ -263,6 +304,7 @@ export default function ServiceRequestPage() {
                         onSubmit={async () => undefined}
                         hideActions
                         locked={!editable}
+                        variant="record"
                         apiRef={formApi}
                     />
                 </>

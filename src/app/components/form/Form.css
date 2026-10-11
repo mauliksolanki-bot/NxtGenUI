@@ -278,9 +278,176 @@
     color: #8a2b2b;
 }
 
+.nxtgen-form-record {
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    padding: 0.75rem 0.5rem 1.25rem;
+}
+
+.nxtgen-form-record .nxtgen-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem 2rem;
+    align-items: start;
+}
+
+.nxtgen-form-record .form-field {
+    display: grid;
+    grid-template-columns: 148px minmax(0, 1fr);
+    align-items: start;
+    column-gap: 0.65rem;
+}
+
+.nxtgen-form-record .form-field-label {
+    text-align: right;
+    padding-top: 0.45rem;
+    margin: 0;
+    font-size: 0.82rem;
+    font-weight: 400;
+    color: #243447;
+}
+
+.nxtgen-form-record .form-field-full {
+    grid-column: 1 / -1;
+    grid-template-columns: 148px minmax(0, 1fr);
+}
+
+.nxtgen-form-record .form-field-error {
+    grid-column: 2;
+}
+
+.nxtgen-form-record .form-field-input,
+.nxtgen-form-record .form-field-select,
+.nxtgen-form-record .form-field-search-multi-box {
+    height: 32px;
+    border: 1px solid #62b8c8;
+    border-radius: 2px;
+    padding: 0 0.5rem;
+    background: #fff;
+}
+
+.nxtgen-form-record .form-field-textarea {
+    height: auto;
+    min-height: 72px;
+    padding: 0.45rem 0.55rem;
+}
+
+.nxtgen-form-record .form-field-input:focus,
+.nxtgen-form-record .form-field-select:focus,
+.nxtgen-form-record .form-field-search-multi-box:focus-within {
+    outline: none;
+    border-color: #1f6f82;
+    box-shadow: 0 0 0 1px rgba(31, 111, 130, 0.18);
+}
+
+.nxtgen-form-record .form-field-control {
+    display: flex;
+    align-items: stretch;
+    gap: 3px;
+    min-width: 0;
+}
+
+.nxtgen-form-record .form-field-control > .form-field-input,
+.nxtgen-form-record .form-field-control > .form-field-select,
+.nxtgen-form-record .form-field-control > .form-field-search {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.form-chrome-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    border: 1px solid #62b8c8;
+    border-radius: 2px;
+    background: #fff;
+    color: #2aa3b8;
+    cursor: pointer;
+    padding: 0;
+}
+
+.form-chrome-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
+.form-chrome-btn:hover {
+    background: #eef8fa;
+}
+
+.nxtgen-form-record .form-field-stage .form-field-select {
+    appearance: none;
+    background: #d7e6ee;
+    border-color: #c5d6df;
+    font-weight: 700;
+    color: #243447;
+    padding-left: 0.7rem;
+}
+
+.nxtgen-form-record .nxtgen-form-fieldset:disabled .form-field-input,
+.nxtgen-form-record .nxtgen-form-fieldset:disabled .form-field-select,
+.nxtgen-form-record .form-field-input[readonly],
+.nxtgen-form-record .form-field-textarea[readonly] {
+    background: #fff;
+    color: #243447;
+}
+
+.nxtgen-form-record .nxtgen-form-fieldset:disabled .form-field-stage .form-field-select,
+.nxtgen-form-record .form-field-stage .form-field-select:disabled {
+    background: #d7e6ee;
+    color: #243447;
+}
+
+.nxtgen-form-record .form-field-worknotes .form-field-textarea {
+    border-left: 4px solid #f0c94d;
+}
+
+.nxtgen-form-record input[type='date'] {
+    position: relative;
+    color-scheme: light;
+}
+
+.nxtgen-form-record input[type='date']::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    position: absolute;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.nxtgen-form-fieldset:disabled .form-chrome-btn {
+    opacity: 0.7;
+    cursor: default;
+}
+
 @media (max-width: 720px) {
     .nxtgen-form-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 960px) {
+    .nxtgen-form-record .nxtgen-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .nxtgen-form-record .form-field,
+    .nxtgen-form-record .form-field-full {
+        grid-template-columns: 1fr;
+    }
+
+    .nxtgen-form-record .form-field-label {
+        text-align: left;
+        padding-top: 0;
+    }
+
+    .nxtgen-form-record .form-field-error {
+        grid-column: 1;
     }
 }
 

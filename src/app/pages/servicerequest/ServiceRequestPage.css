@@ -1,8 +1,122 @@
-.sr-toolbar {
+.sr-page {
+  margin: -0.25rem -0.5rem 0;
+}
+
+.sr-record-header {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin: 0 0 1.25rem;
+  min-height: 46px;
+  padding: 0.35rem 0.75rem;
+  background: #d7eef2;
+  border: 1px solid #b7dbe3;
+  color: #1f6f82;
+}
+
+.sr-back-btn {
+  border: 0;
+  background: transparent;
+  color: #1f6f82;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0.2rem;
+}
+
+.sr-record-title {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin-right: auto;
+}
+
+.sr-record-type {
+  font-size: 0.78rem;
+  color: #3f7f8d;
+}
+
+.sr-record-title strong {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1a5f70;
+}
+
+.sr-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+}
+
+.sr-header-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  min-height: 30px;
+  padding: 0.25rem 0.8rem;
+  border: 1px solid #4aa3b4;
+  border-radius: 4px;
+  background: #fff;
+  color: #1f6f82;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.sr-header-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.sr-header-btn:hover:not(:disabled) {
+  background: #eef8fa;
+}
+
+.sr-header-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.sr-header-btn-primary {
+  background: #1f6f82;
+  color: #fff;
+  border-color: #1f6f82;
+}
+
+.sr-header-btn-primary:hover:not(:disabled) {
+  background: #185a6a;
+}
+
+.sr-attachments-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.9rem 0.2rem;
+  color: #3d454e;
+  font-size: 0.85rem;
+}
+
+.sr-attachments-link {
+  border: 0;
+  background: transparent;
+  color: #1f6f82;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
+.sr-attachments-link:hover {
+  text-decoration: underline;
+}
+
+.sr-attachment-chip {
+  color: #1a466b;
+}
+
+.sr-attachments-none {
+  color: #8a93a0;
 }
 
 .sr-button {
@@ -137,8 +251,13 @@
   margin: 0;
 }
 
+.sr-page .nxtgen-form-record {
+  margin-top: 0.35rem;
+}
+
 .sr-icon-only {
-  padding: 0.55rem 0.7rem;
+  padding: 0.25rem 0.45rem;
+  min-width: 30px;
 }
 
 .create-user-button:disabled {
