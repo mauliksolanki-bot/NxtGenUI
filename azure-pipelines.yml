@@ -1,0 +1,95 @@
+# Repository: NxtGenUI. Select development when creating this pipeline.
+# Create the SSH service connection below using host 172.198.161.188, port 22,
+# and your Ubuntu username/password. Credentials stay in that connection.
+trigger:
+  branches:
+    include:
+      - development
+
+pr:
+  branches:
+    include:
+      - development
+
+variables:
+  sshServiceConnection: 'nxtgen-ubuntu-ssh'
+  deploymentRoot: '/opt/nxtgen'
+  serverHost: '172.198.161.188'
+  nodeVersion: '22.x'
+
+stages:
+  - stage: Build
+    displayName: Build NxtGenUI
+    jobs:
+      - job: BuildUI
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - checkout: self
+            clean: true
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '$(nodeVersion)'
+            displayName: Install Node.js
+          - bash: |
+              set -euo pipefail
+              npm ci
+              node --test tests/*.test.js
+              bash -n deployment/bootstrap-ubuntu.sh deployment/activate-release.sh
+              npm run build
+              test -s dist/index.html
+              mkdir -p "$(Build.ArtifactStagingDirectory)/nxtgen-ui"
+              cp -R dist "$(Build.ArtifactStagingDirectory)/nxtgen-ui/dist"
+              cp deployment/activate-release.sh "$(Build.ArtifactStagingDirectory)/nxtgen-ui/activate-release.sh"
+            displayName: Test and build frontend
+            env:
+              # Browser requests go through the Nginx /api proxy on the VM.
+              VITE_API_BASE_URL: ''
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: '$(Build.ArtifactStagingDirectory)/nxtgen-ui'
+              artifact: nxtgen-ui
+            displayName: Publish deployable files
+
+  - stage: Deploy
+    displayName: Deploy to Ubuntu
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/development'))
+    jobs:
+      - job: DeployUI
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - checkout: none
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifact: nxtgen-ui
+              path: '$(Pipeline.Workspace)/nxtgen-ui'
+          - task: SSH@0
+            displayName: Prepare release folder
+            inputs:
+              sshEndpoint: '$(sshServiceConnection)'
+              runOptions: inline
+              inline: |
+                set -euo pipefail
+                test -d '$(deploymentRoot)/releases' || { echo 'Run deployment/bootstrap-ubuntu.sh on the VM first.'; exit 1; }
+                mkdir -p '$(deploymentRoot)/releases/$(Build.BuildId)'
+              failOnStdErr: false
+          - task: CopyFilesOverSSH@0
+            displayName: Upload files into nxtgen
+            inputs:
+              sshEndpoint: '$(sshServiceConnection)'
+              sourceFolder: '$(Pipeline.Workspace)/nxtgen-ui'
+              contents: '**'
+              targetFolder: '$(deploymentRoot)/releases/$(Build.BuildId)'
+              cleanTargetFolder: false
+              overwrite: true
+          - task: SSH@0
+            displayName: Activate release and check website
+            inputs:
+              sshEndpoint: '$(sshServiceConnection)'
+              runOptions: inline
+              inline: |
+                set -euo pipefail
+                bash '$(deploymentRoot)/releases/$(Build.BuildId)/activate-release.sh' '$(deploymentRoot)' '$(Build.BuildId)' '$(serverHost)'
+              failOnStdErr: false
