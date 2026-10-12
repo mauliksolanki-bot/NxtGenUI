@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import Form from '../../components/form/Form.jsx'
 import ConfirmPopup from '../../components/popup/ConfirmPopup.jsx'
 import { useToast } from '../../components/toast/ToastProvider.jsx'
@@ -12,10 +12,13 @@ import {
     searchRequestedForUsers,
     submitServiceRequest,
     updateServiceRequest,
+    getServiceRequestActivities,
+    postServiceRequestActivity,
 } from '../../api/client.js'
 import { getAuthToken } from '../../auth/session.js'
 import { toSafeUserMessage } from '../../utils/toSafeUserMessage.js'
 import AttachmentsPopup from './AttachmentsPopup.jsx'
+import ApproversList from './ApproversList.jsx'
 import '../administration/users/UsersPage.css'
 import './ServiceRequestPage.css'
 
@@ -29,6 +32,9 @@ const SAVE_FIELDS = [
     'title',
     'description',
     'workNotes',
+    'watchList',
+    'backordered',
+    'orderGuide',
 ]
 
 const searchHandlers = {
@@ -53,13 +59,14 @@ const searchHandlers = {
 function toPayload(values) {
     return SAVE_FIELDS.reduce((payload, field) => {
         const value = values?.[field]
-        payload[field] = value === undefined || value === null ? '' : String(value)
+        payload[field] = field === 'backordered' ? value === true || value === 'true' : value === undefined || value === null ? '' : String(value)
         return payload
     }, {})
 }
 
 export default function ServiceRequestPage() {
     const navigate = useNavigate()
+    const location = useLocation()
     const toast = useToast()
     const { categorySlug, subcategorySlug, srId } = useParams()
     const [serviceRequest, setServiceRequest] = useState(null)
@@ -70,8 +77,41 @@ export default function ServiceRequestPage() {
     const formApi = useRef(null)
     const [pendingFiles, setPendingFiles] = useState([])
     const [attachments, setAttachments] = useState([])
+    const [activities, setActivities] = useState([])
+    const [activityError, setActivityError] = useState('')
+    const [note, setNote] = useState('')
+    const [customerVisible, setCustomerVisible] = useState(false)
+    const [activityFilter, setActivityFilter] = useState('All')
+    const [activityReload, setActivityReload] = useState(0)
 
-    const listPath = `/service-catalog/${categorySlug}`
+    useEffect(() => {
+        let active = true
+        setActivityError('')
+        setActivities([])
+        if (!srId) { setActivities([]); return undefined }
+        getServiceRequestActivities(srId, getAuthToken()).then((result) => {
+            if (active) setActivities(result)
+        }).catch(() => {
+            if (active) setActivityError('Unable to load activities. Please retry.')
+        })
+        return () => { active = false }
+    }, [srId, reloadKey, showAttachments, activityReload])
+
+    async function handlePostNote() {
+        if (isBusy || !note.trim()) return
+        setIsBusy(true)
+        try {
+            const result = await postServiceRequestActivity(srId, { body: note, customerVisible }, getAuthToken())
+            setActivities(result)
+            setActivityError('')
+            setNote('')
+            toast.success('Note posted successfully.')
+        } catch (error) {
+            toast.error(toSafeUserMessage(error?.details?.message ?? 'Unable to post note right now.'))
+        } finally { setIsBusy(false) }
+    }
+
+    const listPath = categorySlug ? `/service-catalog/${categorySlug}` : location.pathname.startsWith('/my-approvals') ? '/my-approvals' : '/requests'
     const basePath = `/service-catalog/${categorySlug}/${subcategorySlug}`
 
     useEffect(() => {
@@ -262,7 +302,7 @@ export default function ServiceRequestPage() {
                         <button
                             type="button"
                             className="sr-header-btn"
-                            disabled={isBusy || isNew}
+                            disabled={isBusy || isNew || !editable}
                             onClick={() => setShowDeleteConfirm(true)}
                         >
                             Delete
@@ -305,8 +345,49 @@ export default function ServiceRequestPage() {
                         hideActions
                         locked={!editable}
                         variant="record"
+                        excludeFields={isNew ? [] : ['workNotes']}
                         apiRef={formApi}
                     />
+                    {!isNew ? (
+                        <div className="sr-journal">
+                            <div className="sr-journal-row">
+                                <label htmlFor="sr-journal-note">{customerVisible ? 'Comments' : 'Work notes'}</label>
+                                <div>
+                                    <textarea id="sr-journal-note" className="form-field-input form-field-textarea sr-journal-input"
+                                        value={note} onChange={(event) => setNote(event.target.value)} maxLength={10000}
+                                        disabled={!editable || isBusy} placeholder={customerVisible ? 'Add a customer visible comment' : 'Add work notes'} />
+                                    <div className="sr-journal-actions">
+                                        <label><input type="checkbox" checked={customerVisible} onChange={(event) => setCustomerVisible(event.target.checked)} disabled={!editable || isBusy} /> Comments (Customer visible)</label>
+                                        <button className="sr-header-btn" type="button" disabled={!editable || isBusy || !note.trim()} onClick={handlePostNote}>Post</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="sr-journal-row">
+                                <span>Activities: {activities.length}</span>
+                                <div>
+                                    <label className="sr-activity-filter">Show
+                                        <select value={activityFilter} onChange={(event) => setActivityFilter(event.target.value)}>
+                                            {['All', 'Work notes', 'Comments', 'Field changes', 'Attachments', 'Request created', 'Approval updated'].map((type) => <option key={type}>{type}</option>)}
+                                        </select>
+                                    </label>
+                                    {activityError ? <p role="alert">{activityError} <button type="button" className="sr-header-btn" onClick={() => setActivityReload((key) => key + 1)}>Retry</button></p> : null}
+                                    <div aria-live="polite">
+                                        {activities.filter((activity) => activityFilter === 'All' || (activityFilter === 'Attachments' ? activity.type.startsWith('Attachment') : activity.type === activityFilter)).map((activity) => (
+                                            <article key={activity.id} className="sr-activity-card">
+                                                <div className="sr-activity-meta"><strong>{activity.author}</strong><span>{activity.type} · <time dateTime={activity.createdAt}>{activity.createdAt.replace('T', ' ').substring(0, 19)}</time></span></div>
+                                                <p>{activity.body}</p>
+                                            </article>
+                                        ))}
+                                        {!activityError && activities.length === 0 ? <p className="sr-attachments-none">No activities yet.</p> : null}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ) : null}
+                    {!isNew ? <section className="sr-related-section" aria-label="Related records">
+                        <div className="sr-bottom-actions"><button type="button" className="sr-header-btn" disabled={isBusy || !editable} onClick={() => runAction(updateServiceRequest, 'Service request updated successfully.', 'Unable to update service request right now.')}>Update</button><button type="button" className="sr-header-btn" disabled={isBusy || !editable} onClick={() => setShowDeleteConfirm(true)}>Delete</button></div>
+                        <ApproversList key={serviceRequest.srId} srId={serviceRequest.srId} refreshToken={reloadKey} onUpdated={() => setReloadKey((key) => key + 1)} />
+                    </section> : null}
                 </>
             ) : (
                 <p className="grid-status">Loading request...</p>

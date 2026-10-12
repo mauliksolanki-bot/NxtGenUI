@@ -15,6 +15,8 @@ import EditGroupPage from './pages/administration/editgroup/EditGroupPage.jsx'
 import ServiceCatalogPage from './pages/catalog/ServiceCatalogPage.jsx'
 import ServiceSubcategoryPage from './pages/catalog/ServiceSubcategoryPage.jsx'
 import ServiceRequestPage from './pages/servicerequest/ServiceRequestPage.jsx'
+import RequestsPage from './pages/requests/RequestsPage.jsx'
+import MyApprovalsPage from './pages/approvals/MyApprovalsPage.jsx'
 
 export default function App() {
     return (
@@ -40,7 +42,10 @@ export default function App() {
                     element={<ServiceRequestPage />}
                 />
                 <Route path="/knowledge" element={<PlaceholderPage title="Knowledge" />} />
-                <Route path="/requests" element={<PlaceholderPage title="Requests" />} />
+                <Route path="/requests" element={<RequestsPage />} />
+                <Route path="/my-approvals" element={<MyApprovalsPage />} />
+                <Route path="/my-approvals/:srId" element={<ServiceRequestPage />} />
+                <Route path="/requests/:srId" element={<ServiceRequestPage />} />
                 <Route path="/cmdb/ciclasses" element={<PlaceholderPage title="CI Classes" />} />
                 <Route path="/cmdb/cirelationships" element={<PlaceholderPage title="CI Relationships" />} />
                 <Route path="/cmdb/cidata" element={<PlaceholderPage title="CI Data" />} />

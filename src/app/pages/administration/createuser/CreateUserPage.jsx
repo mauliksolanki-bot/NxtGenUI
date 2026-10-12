@@ -1,10 +1,14 @@
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import UserRecordHeader from '../users/UserRecordHeader.jsx'
+import UserAssignments from '../users/UserAssignments.jsx'
 import Form from '../../../components/form/Form.jsx'
 import {
     clearGridCache,
     createNewUser,
     fetchUserDetails,
     searchGroups,
+    searchManagers,
     searchUserDetails,
     validateUserData,
 } from '../../../api/client.js'
@@ -33,8 +37,14 @@ function computeDerivedFields(values, fields = []) {
 export default function CreateUserPage() {
     const navigate = useNavigate()
     const toast = useToast()
+    const formApi = useRef(null)
+    const [formBusy, setFormBusy] = useState(true)
 
     const searchHandlers = {
+        manager: {
+            search: (query) => searchManagers(query, getAuthToken()),
+            onSelect: async (option) => ({ manager: option.label, managerId: option.value, managerSelectedLabel: option.label }),
+        },
         userId: {
             resetFormOnClear: true,
             search: async (query) => {
@@ -70,6 +80,7 @@ export default function CreateUserPage() {
     function toPayload(values) {
         return {
             userId: values.userId ? Number(values.userId) : null,
+            managerId: values.manager && values.manager === values.managerSelectedLabel ? Number(values.managerId) : null,
             firstName: values.firstName,
             lastName: values.lastName,
             emailAddress: values.emailAddress,
@@ -110,9 +121,16 @@ export default function CreateUserPage() {
     }
 
     return (
-        <section>
-            <h1>Create User</h1>
+        <section className="sr-page">
+            <UserRecordHeader title="Create User" record="New" formId="create-user-form" submitLabel="Submit" busy={formBusy}
+                onBack={() => navigate('/administration/users')} onClear={() => formApi.current?.reset()} />
             <Form
+                formId="create-user-form"
+                apiRef={formApi}
+                onStatusChange={setFormBusy}
+                hideActions
+                excludeFields={['roleId', 'groupIds']}
+                renderRelated={(props) => <UserAssignments {...props} isNew />}
                 formName="CREATE_USER_FORM"
                 computeFields={computeDerivedFields}
                 searchHandlers={searchHandlers}

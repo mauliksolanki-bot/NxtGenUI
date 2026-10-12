@@ -3,6 +3,7 @@
 // backend returned for them (the menu is already filtered by the user's roles).
 // Routes not listed here (e.g. /dashboard) are open to every signed-in user.
 const ROUTE_ACCESS = [
+    { prefix: '/my-approvals', menuUrl: '/my-approvals' },
     { prefix: '/administration/users', menuUrl: '/administration/users' },
     { prefix: '/administration/createuser', menuUrl: '/administration/users' },
     { prefix: '/administration/edituser', menuUrl: '/administration/users' },

@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import UserRecordHeader from '../users/UserRecordHeader.jsx'
+import UserAssignments from '../users/UserAssignments.jsx'
 import { useNavigate, useParams } from 'react-router-dom'
 import Form from '../../../components/form/Form.jsx'
-import { clearGridCache, getUserById, searchGroups, updateUser } from '../../../api/client.js'
+import { clearGridCache, getUserById, searchGroups, searchManagers, updateUser } from '../../../api/client.js'
 import { getAuthToken } from '../../../auth/session.js'
 import { useToast } from '../../../components/toast/ToastProvider.jsx'
 import { toSafeUserMessage } from '../../../utils/toSafeUserMessage.js'
@@ -26,6 +28,8 @@ export default function EditUserPage() {
     const toast = useToast()
     const [initialValues, setInitialValues] = useState(null)
     const [loadError, setLoadError] = useState('')
+    const formApi = useRef(null)
+    const [formBusy, setFormBusy] = useState(true)
 
     useEffect(() => {
         let isMounted = true
@@ -38,6 +42,9 @@ export default function EditUserPage() {
                 if (isMounted) {
                     setInitialValues({
                         userId: details.userId != null ? String(details.userId) : '',
+                        manager: details.managerName ?? '',
+                        managerId: details.managerId != null ? String(details.managerId) : '',
+                        managerSelectedLabel: details.managerName ?? '',
                         firstName: details.firstName ?? '',
                         lastName: details.lastName ?? '',
                         emplNm: details.emplNm ?? '',
@@ -70,6 +77,7 @@ export default function EditUserPage() {
     function toPayload(values) {
         return {
             id: Number(id),
+            managerId: values.manager && values.manager === values.managerSelectedLabel ? Number(values.managerId) : null,
             userId: values.userId ? Number(values.userId) : null,
             firstName: values.firstName,
             lastName: values.lastName,
@@ -83,6 +91,10 @@ export default function EditUserPage() {
     }
 
     const searchHandlers = {
+        manager: {
+            search: (query) => searchManagers(query, getAuthToken(), id),
+            onSelect: async (option) => ({ manager: option.label, managerId: option.value, managerSelectedLabel: option.label }),
+        },
         groupIds: {
             search: async (query) => {
                 const token = getAuthToken()
@@ -109,35 +121,24 @@ export default function EditUserPage() {
         }
     }
 
-    if (loadError) {
-        return (
-            <section>
-                <h1>Edit User</h1>
-                <p className="grid-status grid-status-error">{loadError}</p>
-            </section>
-        )
-    }
-
-    if (!initialValues) {
-        return (
-            <section>
-                <h1>Edit User</h1>
-                <p className="grid-status">Loading user...</p>
-            </section>
-        )
-    }
-
     return (
-        <section>
-            <h1>Edit User</h1>
-            <Form
+        <section className="sr-page">
+            <UserRecordHeader title="Edit User" record={initialValues?.emplNm || initialValues?.username || `User ${id}`} formId="edit-user-form" submitLabel="Update"
+                busy={formBusy || !initialValues || Boolean(loadError)} onBack={() => navigate('/administration/users')} onClear={() => formApi.current?.reset()} />
+            {loadError ? <p className="grid-status grid-status-error" role="alert">{loadError}</p> : !initialValues ? <p className="grid-status">Loading user...</p> : <Form
+                formId="edit-user-form"
+                apiRef={formApi}
+                onStatusChange={setFormBusy}
+                hideActions
+                excludeFields={['roleId', 'groupIds']}
+                renderRelated={(props) => <UserAssignments {...props} />}
                 formName="EDIT_USER_FORM"
                 computeFields={computeDerivedFields}
                 initialValues={initialValues}
                 searchHandlers={searchHandlers}
                 submitLabel="Save"
                 onSubmit={handleSubmit}
-            />
+            />}
         </section>
     )
 }

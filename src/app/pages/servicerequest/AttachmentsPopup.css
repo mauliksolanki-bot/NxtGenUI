@@ -1,0 +1,27 @@
+.attachments-dialog { width: min(750px, calc(100vw - 2rem)); max-width: none; max-height: calc(100dvh - 2rem); padding: 0; border: 1px solid #c7d8de; border-radius: 15px; background: #fff; color: #304650; box-shadow: 0 12px 32px #0f172033; }
+.attachments-dialog::backdrop { background: #0f172080; }
+.attachments-dialog-header { display: flex; align-items: center; justify-content: space-between; padding: 0.65rem 0.8rem; border-bottom: 1px solid #d1dfe5; }
+.attachments-dialog-header h2 { font-size: 1.35rem; font-weight: 400; margin: 0; }
+.attachments-dialog-header button { padding: 0; width: 38px; height: 38px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: #304650; font-size: 1.6rem; cursor: pointer; }
+.attachments-dialog-header button:hover { background: #e5eff2; }
+.attachments-dialog button:focus-visible, .attachments-dialog input:focus-visible { outline: 2px solid #0083a4; outline-offset: 2px; }
+.attachments-empty-state { min-height: 380px; display: flex; flex-direction: column; align-items: center; padding: 1.25rem; box-sizing: border-box; }
+.attachments-empty-state svg { width: 220px; height: 190px; }
+.attachments-empty-state p { margin: 0.75rem 0 1.25rem; }
+.attachments-choose { border: 1px solid #0083a4; border-radius: 8px; background: #0083a4; color: #fff; padding: 0.55rem 0.75rem; font: inherit; font-weight: 600; cursor: pointer; }
+.attachments-choose:hover:not(:disabled) { background: #006d88; }
+.attachments-dialog button:disabled { opacity: 0.45; cursor: not-allowed; }
+.attachments-dialog-body { padding: 1rem; }
+.attachments-files { list-style: none; margin: 1.25rem 0; padding: 0; }
+.attachments-files li { display: flex; flex-wrap: wrap; align-items: center; gap: 0.2rem; margin-bottom: 0.65rem; }
+.attachments-files input[type=checkbox] { width: 20px; height: 20px; margin: 0 0.25rem 0 0; accent-color: #0083a4; }
+.attachments-link { border: 0; background: transparent; color: #0083a4; padding: 0; font: inherit; cursor: pointer; }
+.attachments-link:hover { text-decoration: underline; }
+.attachments-file-name { overflow-wrap: anywhere; text-align: left; }
+.attachments-dialog-footer { display: flex; justify-content: space-between; gap: 0.5rem; }
+.attachments-outline { border: 1px solid #abc5d1; border-radius: 8px; background: #fff; color: #0083a4; padding: 0.55rem 0.75rem; font: inherit; font-weight: 600; cursor: pointer; }
+.attachments-outline:hover:not(:disabled) { background: #eef8fa; }
+.attachments-remove { color: #b3261e; }
+.attachments-rename { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+.attachments-rename input { min-width: 0; flex: 1; padding: 0.5rem; border: 1px solid #abc5d1; border-radius: 3px; font: inherit; }
+@media (max-width: 480px) { .attachments-empty-state { min-height: 320px; } .attachments-dialog-header h2 { font-size: 1.1rem; } }

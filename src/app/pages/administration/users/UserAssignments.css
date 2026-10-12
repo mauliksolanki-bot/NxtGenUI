@@ -1,0 +1,6 @@
+.user-assignments { margin-top: 1.5rem; font-size: 0.85rem; }
+.user-assignments .sr-bottom-actions { align-items: center; flex-wrap: wrap; }
+.user-assignments .sr-bottom-actions span { color: #627b88; font-size: 0.78rem; }
+.user-assignments .user-tab-inactive { border-top: 1px solid #c8dae1; background: #e5eef1; color: #174e6b; padding-top: calc(0.55rem + 3px); }
+.user-assignments .grid-list-search label { padding: 0.4rem 0.75rem; color: #174e6b; background: #fff; border: 1px solid #abc5d1; border-right: 0; border-radius: 3px 0 0 3px; }
+.user-assignments input[type=checkbox] { accent-color: #0083a4; }

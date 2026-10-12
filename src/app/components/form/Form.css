@@ -7,6 +7,11 @@
     padding: 1.5rem 1.75rem;
 }
 
+.form-field-checkbox { width: 16px; height: 16px; margin: 8px 0; accent-color: #1f6f82; }
+@media (min-width: 961px) {
+    .nxtgen-form-record .form-field-orderguide { grid-column: 2; }
+}
+
 .nxtgen-form-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

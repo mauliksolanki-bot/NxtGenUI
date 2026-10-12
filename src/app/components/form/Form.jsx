@@ -93,11 +93,13 @@ function buildInitialValues(fields, overrides = {}) {
                     ? []
                     : field.defaultValue ?? ''
         return acc
-    }, {})
+    }, { ...overrides })
 }
 
 export default function Form({
                                  formName,
+                                 formId,
+                                 onStatusChange,
                                  computeFields,
                                  searchHandlers = {},
                                  initialValues: initialValuesProp,
@@ -108,7 +110,9 @@ export default function Form({
                                  actionsOutside = false,
                                  hideActions = false,
                                  locked = false,
-                                 variant = 'default',
+                                 variant = 'record',
+                                 excludeFields = [],
+                                 renderRelated,
                                  apiRef,
                              }) {
     const [config, setConfig] = useState(null)
@@ -116,6 +120,9 @@ export default function Form({
     const [fieldErrors, setFieldErrors] = useState({})
     const [isLoading, setIsLoading] = useState(true)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    useEffect(() => {
+        onStatusChange?.(isLoading || isSubmitting || !config)
+    }, [isLoading, isSubmitting, config, onStatusChange])
     const [error, setError] = useState('')
     const [selectionError, setSelectionError] = useState('')
     const [searchResults, setSearchResults] = useState({})
@@ -396,6 +403,7 @@ export default function Form({
     if (apiRef) {
         apiRef.current = {
             getValues: () => values,
+            reset: handleClear,
             setErrors: (errors) => setFieldErrors(errors ?? {}),
         }
     }
@@ -432,6 +440,7 @@ export default function Form({
 
     return (
         <form
+              id={formId}
             className={formClassName}
             onSubmit={handleSubmit}
             noValidate
@@ -439,13 +448,14 @@ export default function Form({
             {selectionError ? <p className="grid-status grid-status-error">{selectionError}</p> : null}
             <fieldset className="nxtgen-form-fieldset" disabled={locked}>
                 <div className="nxtgen-form-grid">
-                    {fields.map((field) => (
+                    {fields.filter((field) => !excludeFields.includes(field.dataField)).map((field) => (
                         <div
                             className={[
                                 'form-field',
                                 field.fullWidth ? 'form-field-full' : '',
                                 field.dataField === 'stage' ? 'form-field-stage' : '',
                                 field.dataField === 'workNotes' ? 'form-field-worknotes' : '',
+                                field.dataField === 'orderGuide' ? 'form-field-orderguide' : '',
                             ]
                                 .filter(Boolean)
                                 .join(' ')}
@@ -457,7 +467,16 @@ export default function Form({
                             </label>
                             {wrapRecordControl(
                                 isRecord ? field : { ...field, fieldType: '', dataField: '' },
-                                field.fieldType === 'DROPDOWN' ? (
+                                field.fieldType === 'CHECKBOX' ? (
+                                <input
+                                    id={field.dataField}
+                                    type="checkbox"
+                                    className="form-field-checkbox"
+                                    disabled={field.readOnly}
+                                    checked={values[field.dataField] === true || values[field.dataField] === 'true'}
+                                    onChange={(event) => handleChange(field.dataField, event.target.checked)}
+                                />
+                            ) : field.fieldType === 'DROPDOWN' ? (
                                 <select
                                     id={field.dataField}
                                     className="form-field-select"
@@ -719,6 +738,13 @@ export default function Form({
                 </div>
             </fieldset>
             {actionsOutside && !hideActions ? actionsBlock : null}
+            {renderRelated?.({ values, fields, onChange: (dataField, value) => {
+                setValues((previous) => {
+                    const next = { ...previous, [dataField]: value }
+                    return { ...next, ...(computeFields ? computeFields(next, fields) : {}) }
+                })
+                setFieldErrors((previous) => ({ ...previous, [dataField]: undefined }))
+            }, errors: fieldErrors, disabled: locked || isSubmitting })}
         </form>
     )
 }

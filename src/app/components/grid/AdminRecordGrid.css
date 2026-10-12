@@ -1,0 +1,11 @@
+.admin-record-page { margin: -0.25rem -0.5rem 0; font-size: 0.85rem; color: #174e6b; }
+.admin-record-page .nxtgen-grid { table-layout: fixed; min-width: 850px; }
+.admin-record-page .nxtgen-grid td { overflow-wrap: anywhere; }
+.admin-record-page .grid-column-actions { white-space: nowrap; }
+.admin-record-page .grid-action-button { width: 28px; height: 28px; border-color: #abc5d1; border-radius: 3px; color: #0083a4; }
+.admin-record-link { color: #0083a4; text-decoration: none; }
+.admin-record-link:hover { text-decoration: underline; }
+.admin-record-status { display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap; }
+.admin-record-status-dot { width: 10px; height: 10px; flex-shrink: 0; border-radius: 50%; background: #a5b5bf; }
+.admin-record-status-dot.is-active { background: #87dc89; }
+.admin-record-description { display: block; line-height: 1.4; }

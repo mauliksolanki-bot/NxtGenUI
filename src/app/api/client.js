@@ -1,5 +1,23 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
 
+export function getMyApprovals(token) { return apiGet('/api/myapprovals', { token }) }
+
+export function getServiceRequestApprovers(srId, token) {
+    return apiGet(`/api/sr/${encodeURIComponent(srId)}/approvers`, { token })
+}
+
+export function updateServiceRequestApprover(srId, approvalId, payload, token) {
+    return apiPost(`/api/sr/${encodeURIComponent(srId)}/approvers/${encodeURIComponent(approvalId)}`, payload, { token })
+}
+
+export function getServiceRequestActivities(srId, token) {
+    return apiGet(`/api/sr/${encodeURIComponent(srId)}/activities`, { token })
+}
+
+export function postServiceRequestActivity(srId, payload, token) {
+    return apiPost(`/api/sr/${encodeURIComponent(srId)}/activities`, payload, { token })
+}
+
 async function parseErrorBody(response) {
     try {
         return await response.json()
@@ -48,14 +66,22 @@ export async function apiPost(path, body, options = {}) {
 }
 
 let navMenuRequest = null
+let navMenuToken = null
 
 // De-dupes concurrent/duplicate calls (e.g. React StrictMode double-invoking
 // effects in development) so the nav menu is only ever fetched once at a time.
 export function getNavMenu(token) {
-    if (!navMenuRequest) {
-        navMenuRequest = apiGet('/api/navmenu', { token }).catch((error) => {
-            navMenuRequest = null
-            throw error
+    if (!navMenuRequest || navMenuToken !== token) {
+        navMenuToken = token
+        const request = apiGet('/api/navmenu', { token })
+        navMenuRequest = request
+        request.finally(() => {
+            if (navMenuRequest === request) {
+                navMenuRequest = null
+                navMenuToken = null
+            }
+        }).catch(() => {
+            // The original request preserves the error for its caller.
         })
     }
 
@@ -64,6 +90,7 @@ export function getNavMenu(token) {
 
 export function clearNavMenuCache() {
     navMenuRequest = null
+    navMenuToken = null
 }
 
 export function login(credentials) {
@@ -173,6 +200,10 @@ export function searchGroups(query, token) {
     return apiGet(`/api/searchgroups?query=${encodeURIComponent(query)}`, { token })
 }
 
+export function searchManagers(query, token, excludeUserId) {
+    return apiGet(`/api/searchmanagers?query=${encodeURIComponent(query)}${excludeUserId ? `&excludeUserId=${encodeURIComponent(excludeUserId)}` : ''}`, { token })
+}
+
 export function getGroupById(id, token) {
     return apiGet(`/api/getgroupbyid?id=${encodeURIComponent(id)}`, { token })
 }
@@ -270,6 +301,10 @@ export async function uploadServiceRequestAttachment(srId, file, token) {
 
 export function deleteServiceRequestAttachments(srId, ids, token) {
     return apiPost(`/api/sr/${encodeURIComponent(srId)}/attachments/delete`, { ids }, authOptions(token))
+}
+
+export function renameServiceRequestAttachment(srId, attachmentId, fileName, token) {
+    return apiPost(`/api/sr/${encodeURIComponent(srId)}/attachments/${encodeURIComponent(attachmentId)}/rename`, { fileName }, authOptions(token))
 }
 
 export async function downloadServiceRequestAttachment(srId, attachmentId, token) {

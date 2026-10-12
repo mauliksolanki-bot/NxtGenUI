@@ -1,0 +1,20 @@
+.sr-related-section { background: #f3f8f9; padding: 0.85rem 0.75rem 1.5rem; margin-top: 0.5rem; }
+.sr-bottom-actions { display: flex; gap: 0.35rem; margin-bottom: 1.5rem; }
+.sr-related-tabs { display: flex; }
+.sr-related-tab { padding: 0.55rem 0.75rem; background: #fff; border: 1px solid #c8dae1; border-top: 4px solid #2b7e26; border-bottom: 0; border-radius: 3px 3px 0 0; color: #246d23; font: inherit; font-size: 0.85rem; }
+.sr-related-panel { border: 1px solid #c8dae1; border-radius: 0 5px 5px 5px; box-shadow: 0 2px 3px #00000018; background: #fff; overflow: hidden; }
+.sr-related-panel .grid-list-toolbar h1 { display: none; }
+.sr-approvers-breadcrumb { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; padding: 0.35rem 0.65rem; background: #f4f8f9; border-bottom: 1px solid #c7d8de; color: #37677f; font-size: 0.85rem; }
+.sr-approvers-breadcrumb button { border: 0; background: transparent; color: #0083a4; cursor: pointer; font: inherit; }
+.sr-related-panel .grid-column-comments { white-space: pre-wrap; overflow-wrap: anywhere; }
+.sr-approver-state-link { padding: 0; border: 0; color: #0083a4; background: transparent; cursor: pointer; font: inherit; }
+.sr-approver-state-link:hover { text-decoration: underline; }
+.sr-approvers-empty { display: flex; min-height: 230px; flex-direction: column; justify-content: center; align-items: center; gap: 0.65rem; color: #174e6b; }
+.sr-approvers-empty svg { width: 160px; height: 125px; }
+.sr-approver-dialog { width: min(480px, calc(100vw - 3rem)); padding: 1.25rem; border: 1px solid #c8dae1; border-radius: 5px; color: #243447; }
+.sr-approver-dialog::backdrop { background: #0f172073; }
+.sr-approver-dialog h2 { margin: 0 0 1rem; font-size: 1.1rem; color: #174e6b; }
+.sr-approver-editor-fields { border: 0; padding: 0; margin: 0; display: grid; gap: 0.75rem; }
+.sr-approver-editor-fields label { display: grid; gap: 0.25rem; font-size: 0.85rem; }
+.sr-approver-editor-fields input, .sr-approver-editor-fields select, .sr-approver-editor-fields textarea { width: 100%; box-sizing: border-box; padding: 0.4rem; border: 1px solid #abc5d1; border-radius: 3px; color: #243447; background: #fff; font: inherit; }
+.sr-approver-dialog-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; }

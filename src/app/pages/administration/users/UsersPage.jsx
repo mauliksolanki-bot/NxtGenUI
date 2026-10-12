@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Grid from '../../../components/grid/Grid.jsx'
+import GridToolbar from '../../../components/grid/GridToolbar.jsx'
 import ConfirmPopup from '../../../components/popup/ConfirmPopup.jsx'
 import { clearGridCache, deleteUser, unlockUser } from '../../../api/client.js'
 import { getAuthToken } from '../../../auth/session.js'
@@ -9,6 +10,8 @@ import { toSafeUserMessage } from '../../../utils/toSafeUserMessage.js'
 import './UsersPage.css'
 
 const USERS_GRID_NAME = 'USERS_GRID'
+const COLUMN_LABELS = { emplNm: 'Employee name', username: 'Username', emailAddress: 'Email address', actvFlag: 'Active', isLocked: 'Locked', lastLoginDate: 'Last login date', actions: 'Actions', id: 'ID' }
+const columnLabel = (column) => COLUMN_LABELS[column.dataField] || column.columnName
 
 export default function UsersPage() {
     const navigate = useNavigate()
@@ -17,6 +20,32 @@ export default function UsersPage() {
     const [isDeleting, setIsDeleting] = useState(false)
     const [isUnlocking, setIsUnlocking] = useState(false)
     const [refreshToken, setRefreshToken] = useState(0)
+    const [config, setConfig] = useState(null)
+    const [searchField, setSearchField] = useState('emplNm')
+    const [query, setQuery] = useState('')
+    const [activeFilter, setActiveFilter] = useState('')
+    const [lockedFilter, setLockedFilter] = useState('')
+    const [showFilters, setShowFilters] = useState(false)
+    const [showColumns, setShowColumns] = useState(false)
+    const [hiddenFields, setHiddenFields] = useState([])
+    const columns = (config?.columns ?? []).filter((column) => !column.hidden).map((column) => ({ ...column, columnName: columnLabel(column) }))
+
+    function resetFilters() { setQuery(''); setActiveFilter(''); setLockedFilter('') }
+    function refresh() { clearGridCache(USERS_GRID_NAME); setRefreshToken((value) => value + 1) }
+    function filterRows(rows) {
+        const search = query.trim().toLocaleLowerCase()
+        return rows.filter((row) => (!search || String(typeof row[searchField] === 'boolean' ? row[searchField] ? 'Yes' : 'No' : row[searchField] ?? '').toLocaleLowerCase().includes(search))
+            && (!activeFilter || String(row.actvFlag) === activeFilter)
+            && (!lockedFilter || String(row.isLocked) === lockedFilter))
+    }
+    function renderCell(row, column) {
+        if (column.dataField === 'emplNm' || column.dataField === 'username') return <Link className="users-record-link" to={`/administration/edituser/${row.id}`}>{row[column.dataField]}</Link>
+        if (column.dataField === 'actvFlag' || column.dataField === 'isLocked') {
+            const value = row[column.dataField] === true
+            return <span className="users-grid-status"><span aria-hidden="true" className={`users-status-dot ${column.dataField === 'isLocked' ? value ? 'is-warning' : 'is-neutral' : value ? 'is-active' : 'is-neutral'}`} />{value ? 'Yes' : 'No'}</span>
+        }
+        return row[column.dataField] === '' || row[column.dataField] == null ? '—' : String(row[column.dataField])
+    }
 
     async function handleUnlock(row) {
         if (isUnlocking) {
@@ -69,22 +98,33 @@ export default function UsersPage() {
     }
 
     return (
-        <section>
-            <div className="page-header-row">
-                <h1>Users</h1>
-                <button
-                    type="button"
-                    className="create-user-button"
-                    onClick={() => navigate('/administration/createuser')}
-                >
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M15 4a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM4 20a7 7 0 0 1 11-5.7V16h-1a2 2 0 0 0-2 2v2H6a2 2 0 0 1-2-2zm15-3h2v2h2v2h-2v2h-2v-2h-2v-2h2z" />
-                    </svg>
-                    Create User
-                </button>
+        <section className="users-record-page">
+            <GridToolbar title="Users" columns={columns.filter((column) => column.filterable).length ? columns.filter((column) => column.filterable) : [{ dataField: 'emplNm', columnName: 'Employee name' }]}
+                searchField={searchField} onSearchFieldChange={setSearchField} query={query} onQueryChange={setQuery}
+                onRefresh={refresh} onToggleFilters={() => setShowFilters((value) => !value)} filtersExpanded={showFilters}
+                onToggleColumns={() => setShowColumns((value) => !value)} columnsExpanded={showColumns}
+                createLabel="Create User" onCreate={() => navigate('/administration/createuser')} />
+            <div className="grid-list-breadcrumb"><button type="button" onClick={resetFilters}>All</button><span>› Users</span>
+                {activeFilter ? <><span>›</span><button type="button" onClick={() => setActiveFilter('')}>Active = {activeFilter === 'true' ? 'Yes' : 'No'} ×</button></> : null}
+                {lockedFilter ? <><span>›</span><button type="button" onClick={() => setLockedFilter('')}>Locked = {lockedFilter === 'true' ? 'Yes' : 'No'} ×</button></> : null}
+                {query ? <><span>›</span><span>{columns.find((column) => column.dataField === searchField)?.columnName || 'Employee name'} contains “{query}”</span></> : null}
             </div>
+            {showFilters ? <div className="grid-list-filter-panel">
+                <label>Active <select value={activeFilter} onChange={(event) => setActiveFilter(event.target.value)}><option value="">All</option><option value="true">Yes</option><option value="false">No</option></select></label>
+                <label>Locked <select value={lockedFilter} onChange={(event) => setLockedFilter(event.target.value)}><option value="">All</option><option value="true">Yes</option><option value="false">No</option></select></label>
+                <button type="button" onClick={resetFilters}>Clear filters</button>
+            </div> : null}
+            {showColumns ? <fieldset className="grid-list-column-panel"><legend>Visible columns</legend>{columns.map((column) => <label key={column.id}><input type="checkbox" checked={!hiddenFields.includes(column.dataField)} disabled={column.dataField === 'emplNm' || column.dataField === 'actions'}
+                onChange={(event) => setHiddenFields((previous) => event.target.checked ? previous.filter((field) => field !== column.dataField) : [...previous, column.dataField])} />{column.columnName}</label>)}</fieldset> : null}
             <Grid
                 gridName={USERS_GRID_NAME}
+                variant="record"
+                onConfigLoaded={setConfig}
+                filterRows={filterRows}
+                hiddenFields={hiddenFields}
+                renderCell={renderCell}
+                getColumnLabel={columnLabel}
+                defaultSort={{ field: 'emplNm', direction: 'asc' }}
                 refreshToken={refreshToken}
                 renderActions={(row) =>
                     row.isLocked === true ? (

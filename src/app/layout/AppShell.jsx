@@ -226,7 +226,7 @@ export default function AppShell() {
         return () => {
             isMounted = false
         }
-    }, [])
+    }, [location.pathname])
 
     const navContent = useMemo(() => {
         if (isLoading) {

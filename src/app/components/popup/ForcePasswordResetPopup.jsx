@@ -57,7 +57,7 @@ export default function ForcePasswordResetPopup({ onCompleted }) {
             <div className="confirm-popup force-reset-popup" role="dialog" aria-modal="true">
                 {title ? <h2 className="confirm-popup-title">{title}</h2> : null}
                 {message ? <p className="confirm-popup-message">{message}</p> : null}
-                <Form formName={FORM_NAME} onSubmit={handleSubmit} showClear={false} actionsOutside submitLabel="Change Password" />
+                <Form formName={FORM_NAME} variant="record" onSubmit={handleSubmit} showClear={false} actionsOutside submitLabel="Change Password" />
             </div>
         </div>
     )

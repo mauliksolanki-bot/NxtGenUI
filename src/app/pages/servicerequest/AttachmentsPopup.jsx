@@ -4,12 +4,14 @@ import {
     downloadServiceRequestAttachment,
     getServiceRequestAttachments,
     uploadServiceRequestAttachment,
+    renameServiceRequestAttachment,
 } from '../../api/client.js'
 import { getAuthToken } from '../../auth/session.js'
 import { useToast } from '../../components/toast/ToastProvider.jsx'
 import { toSafeUserMessage } from '../../utils/toSafeUserMessage.js'
 import '../administration/users/UsersPage.css'
 import './ServiceRequestPage.css'
+import './AttachmentsPopup.css'
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024
 const ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv', 'png', 'jpg', 'jpeg', 'gif']
@@ -33,6 +35,9 @@ function iconFor(fileName) {
 export default function AttachmentsPopup({ srId, pendingFiles = [], onPendingChange, editable, onClose }) {
     const toast = useToast()
     const fileInput = useRef(null)
+    const popup = useRef(null)
+    const [renaming, setRenaming] = useState(null)
+    const [newName, setNewName] = useState('')
     const [attachments, setAttachments] = useState([])
     const [selectedIds, setSelectedIds] = useState([])
     const [isLoading, setIsLoading] = useState(Boolean(srId))
@@ -40,6 +45,44 @@ export default function AttachmentsPopup({ srId, pendingFiles = [], onPendingCha
     const localAttachments = pendingFiles.map((file, index) => ({ id: index, fileName: file.name, file }))
     const visibleAttachments = isLocal ? localAttachments : attachments
     const [isBusy, setIsBusy] = useState(false)
+
+    useEffect(() => {
+        const previousFocus = document.activeElement
+        popup.current.showModal()
+        return () => previousFocus?.focus()
+    }, [])
+
+    async function handleRename() {
+        if (!renaming || isBusy) return
+        const name = newName.trim()
+        if (!name || name.length > 255 || /[\\/\x00-\x1f\x7f]/.test(name) || extensionOf(name) !== extensionOf(renaming.fileName)) {
+            toast.error('Enter a valid file name and keep the original extension.')
+            return
+        }
+        setIsBusy(true)
+        try {
+            if (isLocal) onPendingChange(pendingFiles.map((file, index) => index === renaming.id ? new File([file], name, { type: file.type, lastModified: file.lastModified }) : file))
+            else setAttachments(await renameServiceRequestAttachment(srId, renaming.id, name, getAuthToken()))
+            setRenaming(null)
+        } catch { toast.error('Unable to rename attachment right now.') }
+        finally { setIsBusy(false) }
+    }
+
+    async function handleDownloadAll() {
+        setIsBusy(true)
+        try {
+            for (const attachment of visibleAttachments) {
+                const blob = isLocal ? attachment.file : await downloadServiceRequestAttachment(srId, attachment.id, getAuthToken())
+                const url = URL.createObjectURL(blob)
+                const link = document.createElement('a')
+                link.href = url
+                link.download = attachment.fileName
+                link.click()
+                window.setTimeout(() => URL.revokeObjectURL(url), 60000)
+            }
+        } catch { toast.error('Unable to download all attachments right now.') }
+        finally { setIsBusy(false) }
+    }
 
     useEffect(() => {
         if (!srId) {
@@ -144,80 +187,22 @@ export default function AttachmentsPopup({ srId, pendingFiles = [], onPendingCha
     }
 
     return (
-        <div className="confirm-popup-overlay" role="presentation" onClick={onClose}>
-            <div
-                className="confirm-popup sr-attachments-popup"
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="sr-attachments-title"
-                onClick={(event) => event.stopPropagation()}
-            >
-                <h2 className="confirm-popup-title" id="sr-attachments-title">
-                    Attachments
-                </h2>
-
-                {isLoading ? (
-                    <p className="grid-status">Loading attachments...</p>
-                ) : visibleAttachments.length === 0 ? (
-                    <p className="sr-attachments-empty">No attachments added.</p>
-                ) : (
-                    <ul className="sr-attachments-list">
-                        {visibleAttachments.map((attachment) => (
-                            <li key={attachment.id} className="sr-attachments-item">
-                                <input
-                                    type="checkbox"
-                                    checked={selectedIds.includes(attachment.id)}
-                                    disabled={!editable}
-                                    onChange={() => toggle(attachment.id)}
-                                    aria-label={`Select ${attachment.fileName}`}
-                                />
-                                <span className="sr-attachments-icon" aria-hidden="true">
-                  {iconFor(attachment.fileName)}
-                </span>
-                                <span className="sr-attachments-name" title={attachment.fileName}>
-                  {attachment.fileName}
-                </span>
-                                <button type="button" className="sr-button sr-button-small" onClick={() => handleView(attachment)}>
-                                    View
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
-                )}
-
-                <div className="sr-attachments-actions sr-attachments-footer">
-                    <input
-                        ref={fileInput}
-                        type="file"
-                        hidden
-                        accept={ALLOWED_EXTENSIONS.map((extension) => `.${extension}`).join(',')}
-                        onChange={handleFileChosen}
-                    />
-                    <button
-                        type="button"
-                        className="create-user-button"
-                        disabled={isBusy || !editable}
-                        onClick={() => fileInput.current?.click()}
-                    >
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z" />
-                        </svg>
-                        Choose File
-                    </button>
-                    <button
-                        type="button"
-                        className="create-user-button"
-                        disabled={isBusy || !editable || selectedIds.length === 0}
-                        onClick={handleDelete}
-                    >
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M9 3h6l1 2h4v2H4V5h4zM6 9h12l-1 12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2zm4 3v7h2v-7zm4 0v7h2v-7z" />
-                        </svg>
-                        Delete
-                    </button>
-                </div>
-
-            </div>
-        </div>
+        <dialog ref={popup} className="attachments-dialog" aria-labelledby="sr-attachments-title" onCancel={(event) => { event.preventDefault(); if (!isBusy) onClose() }}>
+            <header className="attachments-dialog-header"><h2 id="sr-attachments-title">Attachments</h2><button type="button" aria-label="Close attachments" title="Close" disabled={isBusy} onClick={onClose}>×</button></header>
+            <input ref={fileInput} type="file" hidden accept={ALLOWED_EXTENSIONS.map((extension) => `.${extension}`).join(',')} onChange={handleFileChosen} />
+            {isLoading ? <p className="grid-status" role="status">Loading attachments...</p> : visibleAttachments.length === 0 ? <div className="attachments-empty-state">
+                <svg viewBox="0 0 220 190" aria-hidden="true"><ellipse cx="110" cy="178" rx="58" ry="6" fill="#e6eef1" /><path d="M75 15h60l30 30v113q0 18-18 18H75q-18 0-18-18V33q0-18 18-18z" fill="#fff" stroke="#c8d9df" strokeWidth="2.5" /><path d="M135 15v22q0 8 8 8h22" fill="#f4f8f9" stroke="#c8d9df" strokeWidth="2.5" /><path d="M130 105l-17 22q-12 15-25 5t-2-24l26-32q8-10 17-3t2 17l-25 31q-4 5-8 1t0-9l18-23" fill="none" stroke="#55adc4" strokeWidth="7" strokeLinecap="round" /><path d="M30 65h8m142-20h12M22 139h12m145-22h15" stroke="#d4e2e7" strokeWidth="2" strokeDasharray="4 5" /></svg>
+                <p>There are no attachments</p><button type="button" className="attachments-choose" disabled={isBusy || !editable} onClick={() => fileInput.current?.click()}>Choose file</button>
+            </div> : <div className="attachments-dialog-body">
+                <button type="button" className="attachments-choose" disabled={isBusy || !editable} onClick={() => fileInput.current?.click()}>Choose file</button>
+                <ul className="attachments-files">{visibleAttachments.map((attachment) => <li key={attachment.id}>
+                    <input type="checkbox" checked={selectedIds.includes(attachment.id)} disabled={isBusy || !editable} onChange={() => toggle(attachment.id)} aria-label={`Select ${attachment.fileName}`} />
+                    <span aria-hidden="true">{iconFor(attachment.fileName)}</span><button type="button" className="attachments-link attachments-file-name" disabled={isBusy} onClick={() => handleView(attachment)}>{attachment.fileName}</button>
+                    {editable ? <button type="button" className="attachments-link" disabled={isBusy} onClick={() => { setRenaming(attachment); setNewName(attachment.fileName) }}>[rename]</button> : null}<button type="button" className="attachments-link" disabled={isBusy} onClick={() => handleView(attachment)}>[view]</button>
+                </li>)}</ul>
+                {renaming ? <div className="attachments-rename"><label htmlFor="attachment-new-name">File name</label><input id="attachment-new-name" autoFocus maxLength={255} value={newName} disabled={isBusy} onChange={(event) => setNewName(event.target.value)} /><button type="button" className="attachments-outline" disabled={isBusy} onClick={handleRename}>Save</button><button type="button" className="attachments-outline" disabled={isBusy} onClick={() => setRenaming(null)}>Cancel</button></div> : null}
+                <footer className="attachments-dialog-footer"><button type="button" className="attachments-outline" disabled={isBusy} onClick={handleDownloadAll}>Download All</button><button type="button" className="attachments-outline attachments-remove" disabled={isBusy || !editable || !selectedIds.length} onClick={handleDelete}>Remove</button></footer>
+            </div>}
+        </dialog>
     )
 }

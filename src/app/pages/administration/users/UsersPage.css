@@ -5,6 +5,19 @@
   margin-bottom: 1rem;
 }
 
+.users-record-page { margin: -0.25rem -0.5rem 0; font-size: 0.85rem; color: #174e6b; }
+.users-record-link { color: #0083a4; text-decoration: none; }
+.users-record-link:hover { text-decoration: underline; }
+.users-record-page .nxtgen-grid td { overflow-wrap: anywhere; }
+.users-record-page .grid-column-actions { white-space: nowrap; }
+.users-record-page .grid-action-button { width: 28px; height: 28px; border-color: #abc5d1; border-radius: 3px; color: #0083a4; }
+.users-record-page .grid-action-button-danger { color: #b3261e; }
+.users-grid-status { display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap; }
+.users-status-dot { width: 10px; height: 10px; flex-shrink: 0; border-radius: 50%; }
+.users-status-dot.is-active { background: #87dc89; }
+.users-status-dot.is-neutral { background: #a5b5bf; }
+.users-status-dot.is-warning { background: #e9dc46; }
+
 .create-user-button {
   display: inline-flex;
   align-items: center;

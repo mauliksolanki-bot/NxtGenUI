@@ -5,6 +5,21 @@
     background: #fff;
 }
 
+.grid-sort-button { border: 0; padding: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; text-align: left; }
+.grid-sort-button:focus-visible { outline: 2px solid #1f6f82; outline-offset: 3px; }
+.nxtgen-grid-record { border: 0; border-radius: 0; }
+.nxtgen-grid-record .nxtgen-grid { font-size: 0.85rem; }
+.nxtgen-grid-record .nxtgen-grid th { background: #fff; padding: 0.5rem 0.75rem; color: #143e55; border-bottom: 1px solid #c7d8de; font-weight: 600; }
+.nxtgen-grid-record .nxtgen-grid td { height: 39px; box-sizing: border-box; padding: 0.45rem 0.75rem; color: #174e6b; border-bottom: 0; }
+.nxtgen-grid-record .nxtgen-grid tbody tr:nth-child(even) { background: #f2f7f8; }
+.nxtgen-grid-record .nxtgen-grid tbody tr:hover { background: #e7f2f5; }
+.nxtgen-grid-record .nxtgen-grid tbody tr.grid-row-selected { background: #dceff3; }
+.nxtgen-grid-record .grid-selection-cell { width: 36px; padding-left: 10px; padding-right: 10px; }
+.grid-selection-cell input { width: 15px; height: 15px; margin: 0; accent-color: #0083a4; vertical-align: middle; }
+.nxtgen-grid-record .grid-column-quantity { text-align: right; }
+.nxtgen-grid-record .grid-column-stage { min-width: 230px; }
+.grid-record-count { padding: 0.65rem 0.75rem; border-top: 1px solid #e5edf0; font-size: 0.75rem; color: #627b88; }
+
 .nxtgen-grid {
     width: 100%;
     border-collapse: collapse;
